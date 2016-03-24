@@ -246,9 +246,9 @@ wildcard certificate and there should be no SSL errors.
 
 ## Plugin Repository Updating/Editing
 
-See the [README for the Python updater script][rus]
+See the [README for the Python updater script][rus] in the **qgis-plugins-xml** code repository.
 
-[rus]: ./www-data/resources/plugins-xml/README.md
+[rus]: https://github.com/boundlessgeo/qgis-plugins-xml
 
 ### Manual editing of `plugins.xml`
 
