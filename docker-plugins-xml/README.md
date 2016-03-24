@@ -56,8 +56,8 @@ and/or iterative rebuilds, you can use the test scripts (review contents first):
 
 ### 1. Clone repo
 
-    $> git clone git@github.com:boundlessgeo/qgis-build.git
-    $> cd qgis-build/plugin-repo/docker-plugins-xml
+    $> git clone git@github.com:boundlessgeo/qgis-plugin-repos.git
+    $> cd qgis-plugin-repos/docker-plugins-xml
 
 ### 2. Build test images
 
