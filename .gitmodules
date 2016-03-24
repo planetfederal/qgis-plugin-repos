@@ -1,0 +1,4 @@
+[submodule "docker-plugins-xml/www-data/resources/plugins-xml"]
+	path = docker-plugins-xml/www-data/resources/plugins-xml
+	url = git@github.com:boundlessgeo/qgis-plugins-xml.git
+	branch = master
