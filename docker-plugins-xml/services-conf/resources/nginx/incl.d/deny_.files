@@ -1,0 +1,5 @@
+# deny access to Apache .htaccess|.HTACCESS and other /. files
+# necessary if root is same for Nginx/Apache
+location ~* /\..+ {
+	deny  all;
+}

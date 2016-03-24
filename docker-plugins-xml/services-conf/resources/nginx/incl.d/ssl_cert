@@ -1,0 +1,11 @@
+ssl_session_cache   shared:SSL:10m;
+ssl_session_timeout 10m;
+
+# ciphers and protocols to meet PCI compliance (no SSLv2 or v3, etc)
+ssl_prefer_server_ciphers on;
+ssl_protocols TLSv1.1 TLSv1.2;
+ssl_ciphers HIGH:!aNULL:!MD5;
+#ssl_ciphers HIGH:MEDIUM:!SSLv2:!ADH:!aNULL:!eNULL:!NULL;
+
+ssl_certificate SSL_CERT;
+ssl_certificate_key SSL_KEY;

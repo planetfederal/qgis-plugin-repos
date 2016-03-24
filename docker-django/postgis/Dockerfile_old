@@ -1,0 +1,5 @@
+FROM kartoza/postgis:9.3-2.1
+MAINTAINER Larry Shaffer<lshaffer@boundlessgeo.com>
+
+ADD setup.sh resources /tmp/
+RUN chmod 0700 /tmp/setup.sh && sh /tmp/setup.sh

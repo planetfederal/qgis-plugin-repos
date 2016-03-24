@@ -1,0 +1,37 @@
+version: '2'
+services:
+  data:
+    build:
+      context: ./www-data
+      args:
+        - SSH_USER
+        - UPLOADED_BY
+        - DOMAIN_TLD
+        - DOMAIN_TLD_DEV
+  conf:
+    build:
+      context: ./services-conf
+      args:
+        - SSH_USER
+        - SSH_PUBLIC_KEY
+        - SSL_CUSTOM_CERT
+        - DOMAIN_TLD
+        - DOMAIN_TLD_DEV
+  base:
+    build:
+      context: ./os-services
+      args:
+        - SSH_USER
+        - SSH_USER_PASS
+        - APT_CATCHER_IP
+    depends_on:
+      - conf
+      - data
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2222:2222"
+    volumes_from:
+      - conf
+      - data
+    restart: on-failure:5
