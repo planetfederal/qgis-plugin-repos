@@ -15,6 +15,7 @@ for subdir in 'qgis' 'qgis-dev'; do
   mkdir -p $WWW_DIR/$subdir/plugins/packages-auth
   touch $WWW_DIR/$subdir/index.html
   touch $WWW_DIR/$subdir/plugins/index.html
+  ln -sf plugins/plugins.xml $WWW_DIR/$subdir/plugins.xml
 done
 
 chmod -R 0755 $WWW_DIR
