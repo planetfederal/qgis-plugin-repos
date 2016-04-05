@@ -24,6 +24,10 @@ mv sshd_config /etc/ssh/sshd/sshd_config
 
 ### Nginx ###
 
+# Configure Nginx
+NGINX_CONF=/etc/nginx
+mv /opt/setup/nginx $NGINX_CONF
+
 # Check for any custom SSL cert/key
 SSL_CERT=$NGINX_CONF/ssl-test/boundless-server.crt
 SSL_KEY=$NGINX_CONF/ssl-test/boundless-server.key
@@ -42,10 +46,6 @@ if [ -n "${SSL_CUSTOM_CERT}" ] && \
   SSL_CERT=$SSL_NGINX/qgisrepo-server.crt
   SSL_KEY=$SSL_NGINX/qgisrepo-server.key
 fi
-
-# Configure Nginx
-NGINX_CONF=/etc/nginx
-mv /opt/setup/nginx $NGINX_CONF
 
 cd $NGINX_CONF
 
