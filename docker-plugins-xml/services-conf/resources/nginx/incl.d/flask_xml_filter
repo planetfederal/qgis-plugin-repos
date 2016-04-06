@@ -1,0 +1,6 @@
+
+location /plugins.xml {
+    include uwsgi_params;
+    uwsgi_pass unix:///tmp/uwsgi.sock;
+}
+

@@ -14,5 +14,5 @@ ADD resources /opt/setup/
 RUN sh /opt/setup/config-services.sh
 
 USER ${SSH_USER}
-VOLUME /etc/nginx /etc/ssl/nginx /etc/ssh/sshd /home/${SSH_USER}/.ssh
+VOLUME /etc/nginx /etc/uwsgi /etc/ssl/nginx /etc/ssh/sshd /home/${SSH_USER}/.ssh
 CMD ["echo", "Configure services for QGIS plugin repo"]

@@ -31,8 +31,8 @@ pushd /opt > /dev/null
       virtualenv --system-site-packages venv
     fi
     # Install any requirements.txt
-    # . venv/bin/activate
-    # pip install something
+    . venv/bin/activate
+    pip install flask
 
 popd  > /dev/null #/opt
 

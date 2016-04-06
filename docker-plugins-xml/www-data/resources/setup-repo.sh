@@ -21,7 +21,6 @@ done
 chmod -R 0755 $WWW_DIR
 chown -R ${SSH_USER}:users $WWW_DIR
 
-
 ### Repo update script ###
 
 REPO_UPDATER=/opt/repo-updater
@@ -47,3 +46,9 @@ sed -i "s@= DOMAIN_TLD_DEV_TEST@= '${DOMAIN_TLD_DEV}'@g" ${UPDATE_SCRIPT}
 sed -i "s@venv@${PY_VENV}@g" ${UPDATE_WRAPPER}
 
 chown -R ${SSH_USER}:users $REPO_UPDATER
+
+
+
+### Copy flask app.py ###
+FLASK_APP_FOLDER=$PLUGINS_XML/flask_app
+cp $FLASK_APP_FOLDER/main.py $WWW_DIR

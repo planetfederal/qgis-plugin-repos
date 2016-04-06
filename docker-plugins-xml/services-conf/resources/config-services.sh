@@ -22,6 +22,13 @@ mkdir -p /etc/ssh/sshd
 mv sshd_config /etc/ssh/sshd/sshd_config
 
 
+### UWSGI ###
+
+# Configure uwsgi
+UWSGI_CONF=/etc/uwsgi
+mv /opt/setup/uwsgi $UWSGI_CONF
+
+
 ### Nginx ###
 
 # Configure Nginx

@@ -1,1 +1,1 @@
-#rewrite ^/plugins.xml$ $scheme://$host/plugins/plugins.xml permanent;
+rewrite ^/plugins.xml$ $scheme://$host/plugins/plugins.xml permanent;

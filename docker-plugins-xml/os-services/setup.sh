@@ -32,8 +32,11 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
   gettext-base \
   openssh-server \
   python-pip \
-  python-lxml
+  python-lxml \
+  python-dev \
+  vim
 
+pip install uwsgi
 apt-get -q clean
 apt-get -q purge
 rm -rf /var/lib/apt/lists/*
