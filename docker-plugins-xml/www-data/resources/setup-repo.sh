@@ -52,3 +52,5 @@ chown -R ${SSH_USER}:users $REPO_UPDATER
 ### Copy flask app.py ###
 FLASK_APP_FOLDER=$PLUGINS_XML/flask_app
 cp $FLASK_APP_FOLDER/main.py $WWW_DIR
+
+chown ${SSH_USER}:users $WWW_DIR/main.py
