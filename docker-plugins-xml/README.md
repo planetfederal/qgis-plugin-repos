@@ -66,6 +66,10 @@ _sourcing_ the custom environment first (configured for `bash` shell):
 
     $> source docker-compose.env
 
+or, if you want to use a custom APT catcher IP address (for example: 172.17.0.2):
+
+    $> CUSTOM_APT_CATCHER_IP=172.17.0.2 source docker-compose.env
+
 Then, build the images. See `docker-compose build --help`
 
     $> docker-compose build
