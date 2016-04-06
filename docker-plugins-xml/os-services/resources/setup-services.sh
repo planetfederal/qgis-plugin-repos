@@ -8,6 +8,7 @@ cd /opt/setup
 
 mkdir -p /var/log/supervisor
 cp services.conf /etc/supervisor/conf.d/
+sed -i "s@uid user@uid ${SSH_USER}@g" /etc/supervisor/conf.d/services.conf
 cat supervisord.conf > /etc/supervisor/supervisord.conf
 
 
