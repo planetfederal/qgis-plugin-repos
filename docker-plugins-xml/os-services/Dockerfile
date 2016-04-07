@@ -11,6 +11,9 @@ RUN bash /tmp/setup.sh
 ADD resources /opt/setup/
 RUN bash /opt/setup/setup-services.sh
 
+# Add user and group for uwsgi
+RUN groupadd -r uwsgi && useradd -r -g uwsgi uwsgi
+
 # Fix for nano
 ENV TERM xterm
 
