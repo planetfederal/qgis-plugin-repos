@@ -70,6 +70,14 @@ or, if you want to use a custom APT catcher IP address (for example: 172.17.0.2)
 
     $> CUSTOM_APT_CATCHER_IP=172.17.0.2 source docker-compose.env
 
+
+Other environment variables are available for services ports customization:
+
+* `CUSTOM_HTTP_PORT` (defaults to 80)
+* `CUSTOM_HTTPS_PORT` (defaults to 443)
+* `CUSTOM_SSH_PORT` (defaults to 222)
+
+
 Then, build the images. See `docker-compose build --help`
 
     $> docker-compose build
