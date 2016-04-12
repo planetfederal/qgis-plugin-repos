@@ -33,6 +33,7 @@ each running service:
 
 - From **conf**:
   - /etc/nginx
+  - /etc/uwsgi
   - /etc/ssl/nginx
   - /etc/ssh/sshd
   - /home/${SSH_USER}/.ssh
@@ -70,13 +71,11 @@ or, if you want to use a custom APT catcher IP address (for example: 172.17.0.2)
 
     $> CUSTOM_APT_CATCHER_IP=172.17.0.2 source docker-compose.env
 
-
 Other environment variables are available for services ports customization:
 
-* `CUSTOM_HTTP_PORT` (defaults to 80)
-* `CUSTOM_HTTPS_PORT` (defaults to 443)
-* `CUSTOM_SSH_PORT` (defaults to 222)
-
+- `CUSTOM_HTTP_PORT` (defaults to 80)
+- `CUSTOM_HTTPS_PORT` (defaults to 443)
+- `CUSTOM_SSH_PORT` (defaults to 2222)
 
 Then, build the images. See `docker-compose build --help`
 
@@ -126,10 +125,13 @@ Logs for the **base** container should look similar to:
     ... INFO RPC interface 'supervisor' initialized
     ... CRIT Server 'unix_http_server' running without any HTTP authentication checking
     ... INFO supervisord started with pid 1
-    ... INFO spawned: 'nginx' with pid 9
-    ... INFO spawned: 'sshd' with pid 10
+    ... INFO spawned: 'app-uwsgi' with pid 10
+    ... INFO spawned: 'nginx' with pid 11
+    ... INFO spawned: 'sshd' with pid 12
+    ... INFO success: app-uwsgi entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
     ... INFO success: nginx entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
     ... INFO success: sshd entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+
 
 ### 4. Get docker machine's IP address
 
@@ -314,3 +316,14 @@ _separately_ as recommended in the documentation, see:
 
 [odc]: https://docs.docker.com/compose/overview/
 [ucp]: https://docs.docker.com/compose/production/
+
+Example scripts are provided to backup and upgrade a running repository:
+
+- [repo-backup.sh][rbu] - backs up running repo's `/var/www/qgis*` data to
+  `qgis-repo-backup_$(date +%Y%m%d-%H%M%S).tgz`
+- [repo-upgrade.sh][rup] - upgrades a running repo, backing up its
+  `/var/www/qgis*` data, then restoring it after upgrade
+
+[rbu]: ./repo-backup.sh
+[rup]: ./repo-upgrade.sh
+
