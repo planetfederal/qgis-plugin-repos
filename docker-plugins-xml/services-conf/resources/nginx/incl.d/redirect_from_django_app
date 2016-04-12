@@ -1,0 +1,6 @@
+# This redirects any previous URLs that may have existed from a previous
+# installation of a QGIS plugin repo django application
+
+
+# note 'opengeo' is specific to Boundless, not QGIS django app
+rewrite ^/(opengeo|author|static|user) / redirect;
