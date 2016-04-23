@@ -13,7 +13,7 @@ Using the repository in QGIS
 To use this repository in QGIS, add the following URL to Settings in the plugin
 manager:
 
-- http://qgis.boundlessgeo.com/plugins/plugins.xml
+- https://qgis.boundlessgeo.com/plugins/plugins.xml
 
 .. _Boundless: http://boundlessgeo.com
 .. _official QGIS repository: http://plugins.qgis.org/
