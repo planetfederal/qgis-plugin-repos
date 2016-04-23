@@ -29,11 +29,11 @@ manager:
 Browsing the repository
 -----------------------
 
-- `Available plugins </plugins/plugins.xml>`_
+- `Available plugins <https://qgis.boundlessgeo.com/plugins/plugins.xml>`_
 
-- `Archives of released versions </plugins/packages>`_
+- `Archives of released versions <https://qgis.boundlessgeo.com/plugins/packages>`_
 
-- `Archives of secured versions </plugins/packages-auth>`_ (requires authentication)
+- `Archives of secured versions <https://qgis.boundlessgeo.com/plugins/packages-auth>`_ (requires authentication)
 
 Looking for something else?
 ---------------------------
