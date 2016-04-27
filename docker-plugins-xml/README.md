@@ -327,3 +327,7 @@ Example scripts are provided to backup and upgrade a running repository:
 [rbu]: ./repo-backup.sh
 [rup]: ./repo-upgrade.sh
 
+
+## Auth0 setup
+
+See the `README.md` file in `auth0` folder.
