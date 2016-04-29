@@ -3,6 +3,8 @@
 # Alternatively you can also directly set client_domain and client_id
 # in this file.
 
+import os
+
 env = None
 
 try:
