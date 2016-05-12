@@ -2,3 +2,6 @@
 	path = docker-plugins-xml/www-data/resources/plugins-xml
 	url = git@github.com:boundlessgeo/qgis-plugins-xml.git
 	branch = master
+[submodule "repo-docs/themes"]
+	path = repo-docs/themes
+	url = https://github.com/boundlessgeo/sphinx-theme
