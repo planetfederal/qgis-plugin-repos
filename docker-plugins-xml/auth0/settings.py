@@ -6,10 +6,14 @@
 import os
 
 env = None
+auth0env = os.path.join(os.path.expanduser("~"), '.auth0.env')
 
 try:
     from dotenv import Dotenv
-    env = Dotenv('./.env')
+    if os.path.exists(auth0env):
+        env = Dotenv(auth0env)
+    else:
+        env = Dotenv('./.env')
 except IOError:
     env = os.environ
 
