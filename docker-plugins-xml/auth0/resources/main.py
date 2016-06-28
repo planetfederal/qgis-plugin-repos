@@ -42,6 +42,8 @@ __date__ = 'April 2016 '
 import os
 from lxml import etree
 from functools import wraps
+import json
+from StringIO import StringIO
 
 from flask import (
     Flask,
@@ -55,7 +57,16 @@ from flask import (
 
 
 from auth0.v2 import authentication, Auth0Error
-from settings import client_id, client_domain
+from settings import client_id, client_domain, debug
+
+DESKTOP_USER_ROLES = [
+    'Registered',
+    'DesktopBasic',
+    'DesktopEnterprise',
+]
+
+# Null or default role
+NULL_ROLE_INDEX = -1
 
 def vjust(str, level=3, delim='.', bitsize=3, fillchar=' ', force_zero=False):
     """
@@ -87,6 +98,15 @@ def vjust(str, level=3, delim='.', bitsize=3, fillchar=' ', force_zero=False):
     return delim.join(parts)
 
 app = Flask(__name__)
+app.debug = debug
+
+@app.errorhandler(403)
+def custom_403(error):
+    return Response('Forbidden - user role is not authorized', 403)
+
+def message_log(msg):
+    if app.debug:
+        app.logger.debug(msg)
 
 def authenticate():
     """
@@ -98,6 +118,49 @@ def authenticate():
         {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
+def get_user_roles(access_token):
+    """
+    Return the user Desktop roles (Registered, DesktopBasic, DesktopEnterprise)
+    form user access_token
+    """
+    message_log("Getting user role for token %s" % access_token)
+    user_authentication = authentication.Users(client_domain)
+    user_info = user_authentication.userinfo(access_token)
+    if user_info == 'Unauthorized':
+        raise Auth0Error(user_info)
+    user_info_f = StringIO(user_info)
+    try:
+        user_info_j = json.load(user_info_f).get("SiteRole")
+    except ValueError:
+        message_log("Returning empty user role")
+        return []
+    message_log("Returning user role %s" % user_info_j)
+    return user_info_j.split(',')
+
+
+def get_plugin_role_index(plugin_name):
+    """
+    Retrieve the plugin role from the xml, default to -1 (null role)
+    """
+    # Default
+    plugin_role_index = NULL_ROLE_INDEX
+    # Load xml from current folder
+    # Points to the real file, not the symlink
+    xml_dir = os.path.join(request.environ.get('DOCUMENT_ROOT', ''), 'plugins')
+    tree = etree.parse(os.path.join(xml_dir, 'plugins.xml'))
+    try:
+        plugin_element = tree.xpath('//file_name[text()="%s"]' % plugin_name)[0]
+        role_name = plugin_element.getparent().find('desktop_role').text
+        plugin_role_index = DESKTOP_USER_ROLES.index(role_name)
+    except IndexError:
+        message_log("Cannot find %s in plugins.xml" % plugin_name)
+    except AttributeError, e:
+        message_log("Cannot find %s role in plugins.xml (%s)" % (plugin_name, e))
+    except ValueError, e:
+        message_log("Cannot find index for role in plugin %s (%s)" % (plugin_name, e))
+    return plugin_role_index
+
+
 def check_authentication(username, password):
     """
     This function is called to check if a username /
@@ -105,7 +168,8 @@ def check_authentication(username, password):
     A login is performed and the access_token is set in the
     app context and will be available for other methods by accessing
     the request context.
-
+    The user role is also stored in the app context for use in
+    the authorization function.
     Returns True if credentials are valid, False in case of authentication
     errors.
     """
@@ -114,49 +178,35 @@ def check_authentication(username, password):
     try:
         response = db_authentication.login(client_id, username, password, 'Username-Password-Authentication')
         access_token = response.get('access_token')
-        if app.debug:
-            app.logger.debug("Got access_token %s" % access_token)
-        # Store
+        message_log("Got access_token %s" % access_token)
+        # Store token
         _request_ctx_stack.top.current_user_token = access_token
-        user_authentication = authentication.Users(client_domain)
-        user_info = user_authentication.userinfo(access_token)
-        if user_info is 'Unauthorized':
-            raise Auth0Error(user_info)
+        # Store user roles for authorization
+        _request_ctx_stack.userRole = get_user_roles(access_token)
+        message_log("Auth0 successful authentication for user %s" % (username))
     except Auth0Error, e:
-        if app.debug:
-            app.logger.debug("Auth0Error while authenticating user {0} {1}".format(username, e))
+        message_log("Auth0Error while authenticating user %s %s" % (username, e))
         return False
     return True
 
-
-def handle_error(error, status_code):
+def authorize(user_roles, plugin_role_index):
     """
-    Format error response and append status code.
+    The download is authorized if plugin roles
+    and user roles match.
     """
-    if app.debug:
-        app.logger.debug("Token error: {0} {1}".format(error.get('description'), status_code))
-    return False
-
-
-def authorize(access_token):
-    """
-    This function retrieves user information based on a valid token,
-    if the token is expired or not valid, the function return False
-    Other checks for user authorization on a particular asset should be
-    implemented here
-    """
-    user_authentication = authentication.Users(client_domain)
-    user_info = user_authentication.userinfo(access_token)
-    if user_info == 'Unauthorized':
-        return False
-    # Place other checks here
-    return True
+    user_role_index =  NULL_ROLE_INDEX
+    for role in user_roles:
+        try:
+            user_role_index = DESKTOP_USER_ROLES.index(role)
+        except ValueError:
+            pass
+    return user_role_index >= plugin_role_index
 
 
 def requires_auth(f):
     """
     Requires valid HTTP basic credentials or a token and checks
-    them against  Auth0 endpoint.
+    them against Auth0 endpoint.
     """
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -178,7 +228,7 @@ def requires_auth(f):
             access_token = _request_ctx_stack.top.current_user_token
         except AttributeError:
             pass
-        # Plain HTTP GET and POST
+        # Plain old HTTP GET and POST
         if access_token is None and request.method == 'GET':
             access_token = request.args.get('access_token', access_token)
         if request.method == 'POST':
@@ -188,10 +238,20 @@ def requires_auth(f):
                 pass
         # No valid token provided or the token is present but it is not valid
         # or other rules deny access to the requested resource
-        if access_token is None or not authorize(access_token):
+        if access_token is None:
             return authenticate()
+        plugin_role_index = get_plugin_role_index(kwargs.get('plugin_name'))
+        message_log("Got plugin role index: %s" % plugin_role_index)
+        try:
+            user_roles = get_user_roles(access_token)
+            message_log("Got user roles: %s" % user_roles)
+        except Auth0Error, e:
+            return abort(403)
+        if not authorize(user_roles, plugin_role_index):
+            return abort(403)
         # Set for debug
         _request_ctx_stack.top.current_user_token = access_token
+        message_log("Returning from requires_auth decorator")
         return f(*args, **kwargs)
     return decorated
 
@@ -237,8 +297,7 @@ def securedPlugins(plugin_name):
     header.
     The caller can re-use the token for future calls.
     """
-    if app.debug:
-        app.logger.debug("Downloading plugin {0} with token {1}".format(plugin_name, _request_ctx_stack.top.current_user_token))
+    message_log("Downloading plugin {0} with token {1}".format(plugin_name, _request_ctx_stack.top.current_user_token))
     plugins_dir = os.path.join(request.environ.get('DOCUMENT_ROOT', ''), 'plugins', 'packages-auth')
     plugin_path = os.path.join(plugins_dir, plugin_name)
     try:

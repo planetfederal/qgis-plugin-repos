@@ -8,6 +8,7 @@ import os
 env = None
 auth0env = os.path.join(os.path.expanduser("~"), '.auth0.env')
 
+
 try:
     from dotenv import Dotenv
     if os.path.exists(auth0env):
@@ -21,6 +22,7 @@ except IOError:
 # The following two parameters are mandatory.
 client_domain = env["AUTH0_DOMAIN"]
 client_id = env["AUTH0_CLIENT_ID"]
+debug = env.get("DEBUG", False)
 
 # This will be only needed in case we will implement JWT tokens
 # (currently not suppported)
