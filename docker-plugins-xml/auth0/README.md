@@ -29,52 +29,54 @@ AUTH0_CLIENT_ID=your_client_id
 AUTH0_DOMAIN=your_domain.auth0.com
 ```
 
+## Plugin Repository Updating/Editing
+
+See the [README for the Python updater script][rus] in the **qgis-plugins-xml** code repository
+for the base manual.
+
+[rus]: https://github.com/boundlessgeo/qgis-plugins-xml
+
+Auth0 enabled repository accepts and extra string parameter `--role` that sets
+the minimum Auth0 role that will be able to download the plugin, for example::
+
+    $> scp uploads/test_plugin_1.zip boundless.test:/opt/repo-updater/uploads/
+
+Run remote updater script on uploaded archive and set minimum role required for
+download to `DesktopBasic`:
+
+    $> ssh boundless.test "/opt/repo-updater/plugins-xml/plugins-xml.sh update --role DesktopBasic test_plugin_1.zip"
+
+
 ## Installation
 
 
 An `install.sh` script is available in the `auth0` folder. The `install.sh`
-script performs the steps described here below.
-
-
-The `qgis-repo.conf` file contains placeholders for the domain name. You can
-replace the placeholders with the domain name that you used to configure
-the docker containers with:
-
-```bash
-. ../docker-compose.env
-sed -i -e "s/domain-tld-dev/${DOMAIN_TLD_DEV}/g" qgis-repo.conf
-sed -i -e "s/domain-tld/${DOMAIN_TLD}/g" qgis-repo.conf
-```
-
-Copy the files `settings.py`, `main.py` and `qgis-repo.conf` into the container
-with `scp`
-
-```bash
-scp main.py boundless.test:/var/www
-scp settings.py boundless.test:/var/www
-scp qgis-repo.conf boundless.test:/home/user
-scp REQUIREMENTS.txt boundless.test:/home/user
-```
-
-To install the files and restart the services, log into the container with `ssh`
-and gain root privleges with `sudo`:
-```bash
-ssh boundless.test
-# Run the following commands in the container
-sudo su -
-. /opt/venv/bin/activate
-pip install -r /home/user/REQUIREMENTS.txt
-mv /home/user qgis-repo.conf /etc/nginx/conf.d/
-supervisorctl restart app-uwsgi
-supervisorctl restart nginx
-```
+script performs the installation of Auth0 enabled repository.
 
 
 ## Testing the endpoints
 
-
 Please refer to the `README.md` in the top-level folder for detailed
 instructions about building the dockers and upload example plugins.
+
+### Fully automated tests
+
+The directory `auth0/tests` contains a python test script that can be run
+from the command line with:
+
+    $> python endpoint_tests.py
+
+The test uses three real test accounts that must be configured in `.env`:
+
+    QGIS_FREE_USERNAME=********* # with Registered permissions
+    QGIS_FREE_PASSWORD=*********
+    QGIS_BASIC_USERNAME=******** # with DesktopBasic and Suite permissions
+    QGIS_BASIC_PASSWORD=********
+    QGIS_ENTERPRISE_USERNAME=*** # with DesktopEnterprise and Suite permissions
+    QGIS_ENTERPRISE_PASSWORD=***
+
+
+### Manual tests
 
 The following endpoint is protected:
 https://qgis.boundless.test/plugins/packages-auth/test_plugin_3.0.1.zip
