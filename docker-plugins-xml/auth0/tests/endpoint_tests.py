@@ -173,7 +173,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertEqual(response.getcode(), 200)
 
 
-    @unittest.skip("Auth0 locks")
+    #@unittest.skip("Auth0 locks")
     def test_WrongAuthNoRoleRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -204,7 +204,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertEqual(len(response.read()), 5082)
         self.assertEqual(response.getcode(), 200)
 
-    @unittest.skip("Auth0 locks")
+    #@unittest.skip("Auth0 locks")
     def test_WrongAuthDesktopBasicRequired(self):
         """
         Test that a wrong auth request for a plugin that
