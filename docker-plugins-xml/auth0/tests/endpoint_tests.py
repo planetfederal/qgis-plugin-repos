@@ -5,12 +5,25 @@
 /***************************************************************************
  endpoint_tests.py
 
+ Performs GET/POST and token tests on a test repository endpoint loaded
+ with the test plugins as explained in the README.md
+
+ WARNING: the wrong credentials tests are disabled (skipped) to avoid Auth0
+          IP and account locks.
+
  Test matrix
  plugin      auth required       min role
  1           no                  -
  2           yes                 DesktopBasic
  3           yes                 -
  4           yes                 DesktopEnterprise
+
+Tested Authentication methods:
+- HTTP Basic with username and password method GET
+- HTTP Basic with username and password method POST
+- Authorization Request Header Field access token (Bearer) method POST
+- Access token passed on the query string as `access_token` method GET
+- Form-Encoded Body Parameter access token passed as `access_token` method POST
 
 
                              -------------------
@@ -78,19 +91,24 @@ except KeyError:
     env_err()
 
 
-class TestAuth0(unittest.TestCase):
+class TestAuth0Base(unittest.TestCase):
 
-    def _do_post(self, url, values={}, headers={}):
+    _tokens_cache = {}
+
+    def _do_post(self, url, requires_auth=True, values={}, headers={}):
         """
-        Make a post request
+        Make a POST request, turns into GET if not requires auth
+        (nginx does not support POST on static files)
         """
+        if not requires_auth:
+            return self._do_get(url, requires_auth, values, headers)
         data = urllib.urlencode(values)
         req = urllib2.Request(url, data, headers)
         return urllib2.urlopen(req)
 
-    def _do_get(self, url, headers={}):
+    def _do_get(self, url, requires_auth=True, values={}, headers={}):
         """
-        Make a get request
+        Make a GET request
         """
         req = urllib2.Request(url)
         for n, v in headers.iteritems():
@@ -104,12 +122,42 @@ class TestAuth0(unittest.TestCase):
         base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
         return {"Authorization": "Basic %s" % base64string}
 
+    def _http_bearer_header(self, access_token):
+        """
+        Add the Authorization: Bearer header
+        """
+        return {"Authorization": "Bearer %s" % access_token}
+
+    def _get_access_token(self, url, username=None, password=None):
+        """Return the access_token"""
+        try:
+            access_token = self._tokens_cache['%s%s' % (username, password)]
+        except KeyError:
+            headers = self._http_basic_header(username, password)
+            response = self._do_post(url, requires_auth=True, headers=headers)
+            access_token = response.headers['X-Access-Token']
+            self._tokens_cache['%s%s' % (username, password)] = access_token
+        return access_token
+
+
+class TestAuth0GET(TestAuth0Base):
+    """
+    HTTP Basic with username and password method POST
+    """
+
+    def _do_test(self, url, username=None, password=None, requires_auth=True, values={}):
+        headers = {}
+        if requires_auth:
+            headers = self._http_basic_header(username, password)
+        return self._do_get(url, requires_auth, values, headers)
+
     def test_noAuthRequired(self):
         """
         Test a valid request for a plugin that:
         - do not require authentication
         """
-        response = self._do_get(XML_ENDPOINT + '/packages/test_plugin_1.0.1.zip')
+        response = self._do_test(XML_ENDPOINT + '/packages/test_plugin_1.0.1.zip',
+                                 requires_auth=False)
         self.assertEqual(len(response.read()), 4880)
         self.assertEqual(response.getcode(), 200)
 
@@ -118,34 +166,14 @@ class TestAuth0(unittest.TestCase):
         Test a valid auth request for a plugin that:
         - do not require authentication
         """
-        response = self._do_get(XML_ENDPOINT + '/packages/test_plugin_1.0.1.zip',
-                                headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopBasic']))
+        response = self._do_test(XML_ENDPOINT + '/packages/test_plugin_1.0.1.zip',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'],
+                                 requires_auth=False)
         self.assertEqual(len(response.read()), 4880)
         self.assertEqual(response.getcode(), 200)
 
-    def test_WrongAuthDesktopBasicRequired(self):
-        """
-        Test that a wrong auth request for a plugin that
-        - requires authentication
-        - require DesktopBasic authorization
-        """
-        with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip')
-        the_exception = cm.exception
-        self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
-        self.assertEqual(the_exception.getcode(), 401)
 
-    def test_ValidAuthDesktopBasicRequired(self):
-        """
-        Test that a valid auth request for a plugin that
-        - requires authentication
-        - require DesktopBasic authorization
-        """
-        response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
-                                headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopBasic']))
-        self.assertEqual(len(response.read()), 5189)
-        self.assertEqual(response.getcode(), 200)
-
+    @unittest.skip("Auth0 locks")
     def test_WrongAuthNoRoleRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -153,14 +181,14 @@ class TestAuth0(unittest.TestCase):
         - requires no role
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip')
+            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip')
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
         self.assertEqual(the_exception.getcode(), 401)
         # Wrong username and password
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip',
-                                    headers=self._http_basic_header('wrong_username', 'wrong_password'))
+            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip',
+                                     'wrong_username', 'wrong_password')
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
         self.assertEqual(the_exception.getcode(), 401)
@@ -171,12 +199,12 @@ class TestAuth0(unittest.TestCase):
         - requires authentication
         - requires no role
         """
-        response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip',
-                                headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopBasic']))
+        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
         self.assertEqual(len(response.read()), 5082)
         self.assertEqual(response.getcode(), 200)
 
-
+    @unittest.skip("Auth0 locks")
     def test_WrongAuthDesktopBasicRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -184,14 +212,14 @@ class TestAuth0(unittest.TestCase):
         - require DesktopBasic authorization
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip')
+            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip')
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
         self.assertEqual(the_exception.getcode(), 401)
         # Wrong username and password
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
-                                    headers=self._http_basic_header('wrong_username', 'wrong_password'))
+            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+                                     'wrong_username', 'wrong_password')
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
         self.assertEqual(the_exception.getcode(), 401)
@@ -202,10 +230,11 @@ class TestAuth0(unittest.TestCase):
         - requires authentication
         - require DesktopBasic authorization
         """
-        response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
-                                headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopBasic']))
+        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
         self.assertEqual(len(response.read()), 5189)
         self.assertEqual(response.getcode(), 200)
+
 
     def test_ValidAuthWrongRoleDesktopBasicRequired(self):
         """
@@ -214,8 +243,8 @@ class TestAuth0(unittest.TestCase):
         - require DesktopBasic authorization
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
-                                    headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['Registered']))
+            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+                                     *DESKTOP_ROLE_ACCOUNTS['Registered'])
         the_exception = cm.exception
         self.assertEqual(the_exception.getcode(), 403)
         self.assertEqual(the_exception.msg, 'FORBIDDEN')
@@ -227,8 +256,8 @@ class TestAuth0(unittest.TestCase):
         - require DesktopEnterprise authorization
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_4.0.1.zip',
-                                    headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopBasic']))
+            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_4.0.1.zip',
+                                     *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
         the_exception = cm.exception
         self.assertEqual(the_exception.getcode(), 403)
         self.assertEqual(the_exception.msg, 'FORBIDDEN')
@@ -239,8 +268,8 @@ class TestAuth0(unittest.TestCase):
         - requires authentication
         - require DesktopEnterprise authorization
         """
-        response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_4.0.1.zip',
-                                headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise']))
+        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_4.0.1.zip',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
         self.assertEqual(len(response.read()), 2979)
         self.assertEqual(response.getcode(), 200)
 
@@ -250,11 +279,59 @@ class TestAuth0(unittest.TestCase):
         - requires authentication
         - require DesktopEnterprise authorization
         """
-        response = self._do_get(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
-                                headers=self._http_basic_header(*DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise']))
+        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
         self.assertEqual(len(response.read()), 5189)
         self.assertEqual(response.getcode(), 200)
 
+
+class TestAuth0POST(TestAuth0GET):
+    """
+    HTTP Basic with username and password method POST
+    """
+
+    def _do_test(self, url, username=None, password=None, requires_auth=True, values={}):
+        headers = {}
+        if not requires_auth or username is None or password is None:
+            return self._do_get(url, requires_auth=requires_auth)
+        headers = self._http_basic_header(username, password)
+        return self._do_post(url, requires_auth, values, headers)
+
+
+class TestAuth0Bearer(TestAuth0GET):
+    """
+    Authorization Request Header Field access token (Bearer) method POST
+    """
+
+    def _do_test(self, url, username=None, password=None, requires_auth=True, values={}):
+        # Get the token
+        headers = {}
+        if requires_auth and username is not None and password is not None:
+            headers = self._http_bearer_header(self._get_access_token(url, username, password))
+            return self._do_post(url, requires_auth, values, headers)
+        else: # for clarity
+            return self._do_get(url, requires_auth, values, headers)
+
+
+class TestAuth0GETQueryString(TestAuth0GET):
+    """
+    Access token passed on the query string as `access_token` method GET
+    """
+    def _do_test(self, url, username=None, password=None, requires_auth=True, values={}):
+        headers = {}
+        if requires_auth and username is not None and password is not None:
+            url = '%s?access_token=%s' % (url, self._get_access_token(url, username, password))
+        return self._do_get(url, requires_auth, values, headers)
+
+
+class TestAuth0POSTAccessToken(TestAuth0GET):
+    """
+    Form-Encoded Body Parameter access token passed as `access_token` method POST
+    """
+    def _do_test(self, url, username=None, password=None, requires_auth=True, values={}):
+        if requires_auth and username is not None and password is not None:
+            values = {'access_token': self._get_access_token(url, username, password)}
+        return self._do_post(url, requires_auth, values)
 
 
 if __name__ == '__main__':
