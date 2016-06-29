@@ -2,8 +2,14 @@
 # Auth0 setup for plugin repos
 
 
-The modifications provided in this directory, enable Auth0 authentication for
-the plugins in the protected folder (`packages-auth`).
+The modifications provided in this directory, enable **Auth0** authentication
+and *Desktop tiers* authoriztion for the plugins in the protected folder
+(`packages-auth`).
+
+Please refer to the [README for the main Docker repository][mdr] in the
+parent directory of this repository for the full documentation.
+The present document document contains description of the additional features
+and methods available in **Auth0-enabled** repositories.
 
 Supported authentication methods are:
 
@@ -13,12 +19,18 @@ Supported authentication methods are:
 - HTTP POST Form-Encoded Body Parameter access token passed as
   `access_token`
 
+[mdr]: https://github.com/boundlessgeo/qgis-plugin-repos/tree/master/docker-plugins-xml
+
+## Building and running
+
+To build, run and test the **Auth0-enabled** repository you should use the
+versions of the `test-*.sh` scripts in the same directory of the current
+`README.md` (`auth0`).
 
 ## Configuration
 
-
-Auth0 credentials are stored in `settings.py` (default implementation reads the
-values from an `.env` file).
+**Auth0** credentials are stored in `settings.py` (the default implementation
+reads the values from an `.env` file).
 
 You can either provide a `.env` file, fill in the correct credentials and store
 it in the container as `/var/www/.env` or directly edit the `settings.py` file.
@@ -31,12 +43,12 @@ AUTH0_DOMAIN=your_domain.auth0.com
 
 ## Plugin Repository Updating/Editing
 
-See the [README for the Python updater script][rus] in the **qgis-plugins-xml** code repository
-for the base manual.
+See the [README for the Python updater script][rus] in the **qgis-plugins-xml**
+code repository for the base manual.
 
 [rus]: https://github.com/boundlessgeo/qgis-plugins-xml
 
-Auth0 enabled repository accepts and extra string parameter `--role` that sets
+**Auth0** enabled repository accepts and extra string parameter `--role` that sets
 the minimum Auth0 role that will be able to download the plugin, for example::
 
     $> scp uploads/test_plugin_1.zip boundless.test:/opt/repo-updater/uploads/
@@ -56,13 +68,18 @@ script performs the installation of Auth0 enabled repository.
 
 ## Testing the endpoints
 
-Please refer to the `README.md` in the top-level folder for detailed
+Please refer to the [base manual][mdr] in the top-level folder for detailed
 instructions about building the dockers and upload example plugins.
 
 ### Fully automated tests
 
-The directory `auth0/tests` contains a python test script that can be run
-from the command line with:
+The directory `tests` contains a python test script that can be used
+to test the dockerized repository created with `test-build.run load`
+as explained in the [base manual][mdr].
+The list of Python requirements for the test script can be found in the file
+`resources/REQUIREMENTS.txt`.
+
+Start the tests from the command line with:
 
     $> python endpoint_tests.py
 
