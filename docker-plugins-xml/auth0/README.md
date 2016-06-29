@@ -44,7 +44,7 @@ AUTH0_DOMAIN=your_domain.auth0.com
 #DEBUG=True
 ```
 
-### Caching or user roles
+### Caching of user roles
 
 User roles are cached to avoid `Too many requests` HTTP responses from Auth0
 endpoint while executing the tests.
