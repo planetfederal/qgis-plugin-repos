@@ -38,12 +38,20 @@
 __author__ = 'Alessandro Pasotti'
 __date__ = 'April 2016 '
 
+# Configuration:
+CACHE_TIMEOUT = 60
+from werkzeug.contrib.cache import SimpleCache
+roles_cache = RolesCache()
+# Or better:
+#from werkzeug.contrib.cache import MemcachedCache
+#roles_cache = MemcachedCache(['127.0.0.1:11211'])
+# End configuration
 
 import os
 from lxml import etree
 from functools import wraps
 import json
-from StringIO import StringIO
+import time
 
 from flask import (
     Flask,
@@ -100,6 +108,7 @@ def vjust(str, level=3, delim='.', bitsize=3, fillchar=' ', force_zero=False):
 app = Flask(__name__)
 app.debug = debug
 
+
 @app.errorhandler(403)
 def custom_403(error):
     return Response('Forbidden - user role is not authorized', 403)
@@ -124,18 +133,30 @@ def get_user_roles(access_token):
     form user access_token
     """
     message_log("Getting user role for token %s" % access_token)
-    user_authentication = authentication.Users(client_domain)
-    user_info = user_authentication.userinfo(access_token)
-    if user_info == 'Unauthorized':
-        raise Auth0Error(user_info)
-    user_info_f = StringIO(user_info)
-    try:
-        user_info_j = json.load(user_info_f).get("SiteRole")
-    except ValueError:
-        message_log("Returning empty user role")
-        return []
-    message_log("Returning user role %s" % user_info_j)
-    return user_info_j.split(',')
+    user_roles = cache.get(access_token)
+    if user_roles is not None:
+        message_log("Using cached user roles for token %s" % access_token)
+    else:
+        user_authentication = authentication.Users(client_domain)
+        # Throttle
+        for i in range(1, 4):
+            user_info = user_authentication.userinfo(access_token)
+            if user_info == 'Too Many Requests':
+                message_log("Too many requests: throttling (%s seconds) for token %s" % (i*2, access_token))
+                time.sleep(i*2)
+            else:
+                break
+        if user_info == 'Unauthorized':
+            raise Auth0Error(user_info)
+        try:
+            user_info_j = json.loads(user_info).get("SiteRole")
+            user_roles = user_info_j.split(',')
+            roles_cache.set(access_token, user_roles, timeout=CACHE_TIMEOUT)
+        except ValueError:
+            message_log("Returning empty user role")
+            return []
+    message_log("Returning user role %s" % user_roles)
+    return user_roles
 
 
 def get_plugin_role_index(plugin_name):
@@ -194,6 +215,7 @@ def authorize(user_roles, plugin_role_index):
     The download is authorized if plugin roles
     and user roles match.
     """
+    message_log("Comparing user roles  %s with index %s" % (user_roles, plugin_role_index))
     user_role_index =  NULL_ROLE_INDEX
     for role in user_roles:
         try:
@@ -246,8 +268,10 @@ def requires_auth(f):
             user_roles = get_user_roles(access_token)
             message_log("Got user roles: %s" % user_roles)
         except Auth0Error, e:
+            message_log("Auth0Error - Returning 403: %s" % e)
             return abort(403)
         if not authorize(user_roles, plugin_role_index):
+            message_log("Not authorized - Returning 403")
             return abort(403)
         # Set for debug
         _request_ctx_stack.top.current_user_token = access_token

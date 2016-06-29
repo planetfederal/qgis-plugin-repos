@@ -39,7 +39,29 @@ A typical `.env` file looks like this:
 ```bash
 AUTH0_CLIENT_ID=your_client_id
 AUTH0_DOMAIN=your_domain.auth0.com
+
+# Activate for debug (not for production!)
+#DEBUG=True
 ```
+
+### Caching or user roles
+
+User roles are cached to avoid `Too many requests` HTTP responses from Auth0
+endpoint while executing the tests.
+
+The cache backend and duration can be set at the top of `main.py` (see comments
+in the file).
+
+### Debugging
+
+To activate debug output from the server, set `DEBUG=True` in the `.env` file.
+
+If you also want to see the Python stack trace from uwsgi, add
+`--catch-exceptions` in `/etc/supervisor/conf.d/services.conf`:
+
+    [program:app-uwsgi]
+    ; --catch-exceptions for debugging only!
+    command = /usr/local/bin/uwsgi --ini /etc/uwsgi/uwsgi.ini --uid uwsgi --gid uwsgi --catch-exceptions
 
 ## Plugin Repository Updating/Editing
 
