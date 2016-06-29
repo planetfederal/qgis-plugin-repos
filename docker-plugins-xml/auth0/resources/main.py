@@ -40,7 +40,7 @@ __date__ = 'April 2016 '
 
 # Configuration:
 CACHE_TIMEOUT = 60
-from werkzeug.contrib.cache import SimpleCache
+from werkzeug.contrib.cache import SimpleCache as RolesCache
 roles_cache = RolesCache()
 # Or better:
 #from werkzeug.contrib.cache import MemcachedCache
@@ -133,7 +133,7 @@ def get_user_roles(access_token):
     form user access_token
     """
     message_log("Getting user role for token %s" % access_token)
-    user_roles = cache.get(access_token)
+    user_roles = roles_cache.get(access_token)
     if user_roles is not None:
         message_log("Using cached user roles for token %s" % access_token)
     else:
