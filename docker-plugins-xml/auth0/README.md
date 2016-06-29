@@ -3,12 +3,12 @@
 
 
 The modifications provided in this directory, enable **Auth0** authentication
-and *Desktop tiers* authoriztion for the plugins in the protected folder
+and *Desktop tiers* authorization for the plugins in the protected folder
 (`packages-auth`).
 
 Please refer to the [README for the main Docker repository][mdr] in the
 parent directory of this repository for the full documentation.
-The present document document contains description of the additional features
+The present document contains a description of the additional features
 and methods available in **Auth0-enabled** repositories.
 
 Supported authentication methods are:
@@ -23,7 +23,7 @@ Supported authentication methods are:
 
 ## Building and running
 
-To build, run and test the **Auth0-enabled** repository you should use the
+To build, run and test the **Auth0-enabled** repository you can use the
 versions of the `test-*.sh` scripts in the same directory of the current
 `README.md` (`auth0`).
 
