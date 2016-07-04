@@ -24,9 +24,9 @@ client_domain = env["AUTH0_DOMAIN"]
 client_id = env["AUTH0_CLIENT_ID"]
 debug = env.get("DEBUG", False)
 
-# This will be only needed in case we will implement JWT tokens
-# (currently not suppported)
-#client_secret = env['AUTH0_CLIENT_SECRET']
+# This is used optionally to decode JWT tokens and avoid double calls to
+# Auth0 backedn API to get the user profile.
+client_secret = env.get('AUTH0_CLIENT_SECRET', None)
 
 # This will be only necessary if we are going to perform any administrative
 # query or task using v2 API

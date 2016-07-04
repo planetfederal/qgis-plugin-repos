@@ -52,6 +52,8 @@ from lxml import etree
 from functools import wraps
 import json
 import time
+import jwt
+import base64
 
 from flask import (
     Flask,
@@ -65,7 +67,7 @@ from flask import (
 
 
 from auth0.v2 import authentication, Auth0Error
-from settings import client_id, client_domain, debug
+from settings import client_id, client_domain, client_secret, debug
 
 DESKTOP_USER_ROLES = [
     'Registered',
@@ -130,13 +132,15 @@ def authenticate():
 def get_user_roles(access_token):
     """
     Return the user Desktop roles (Registered, DesktopBasic, DesktopEnterprise)
-    form user access_token
+    form user access_token.
+    First check for cached values.
     """
-    message_log("Getting user role for token %s" % access_token)
+    message_log("Retrieving user role for token %s" % access_token)
     user_roles = roles_cache.get(access_token)
     if user_roles is not None:
         message_log("Using cached user roles for token %s" % access_token)
     else:
+        message_log("Fetching user roles for token %s" % access_token)
         user_authentication = authentication.Users(client_domain)
         # Throttle
         for i in range(1, 4):
@@ -189,22 +193,42 @@ def check_authentication(username, password):
     A login is performed and the access_token is set in the
     app context and will be available for other methods by accessing
     the request context.
-    The user role is also stored in the app context for use in
-    the authorization function.
+    The user role is also retrieved and stored in the roles cache ready
+    for use in the authorization function.
     Returns True if credentials are valid, False in case of authentication
     errors.
     """
     # Login
     db_authentication = authentication.Database(client_domain)
     try:
-        response = db_authentication.login(client_id, username, password, 'Username-Password-Authentication')
+        response = db_authentication.login(client_id,
+                                           username, password,
+                                           'Username-Password-Authentication',
+                                           scope='openid SiteRole')
         access_token = response.get('access_token')
+        # Get the JWT token (optionally used if secret is specified)
+        if client_secret is not None:
+            try:
+                id_token = response.get('id_token')
+                payload = jwt.decode(
+                    id_token,
+                    base64.b64decode(client_secret.replace("_","/").replace("-","+")),
+                    audience=client_id
+                )
+                message_log("Got payload %s from JWT: %s" % (payload, id_token))
+                user_roles = payload.get('SiteRole', '').split(',')
+                message_log("Got access_token %s and roles %s for user %s" % (access_token, user_roles, username))
+                # Store user roles for authorization
+                roles_cache.set(access_token, user_roles, timeout=CACHE_TIMEOUT)
+            except jwt.exceptions.DecodeError, e:
+                message_log("%s for %s" % (e, access_token))
+            except Exception, e:
+                message_log("Wrong JWT decoding (%s) for %s" % (e, access_token))
         message_log("Got access_token %s" % access_token)
         # Store token
         _request_ctx_stack.top.current_user_token = access_token
-        # Store user roles for authorization
-        _request_ctx_stack.userRole = get_user_roles(access_token)
-        message_log("Auth0 successful authentication for user %s" % (username))
+        user_roles = get_user_roles(access_token)
+        message_log("Auth0 successful authentication for user %s with role: %s" % (username, user_roles))
     except Auth0Error, e:
         message_log("Auth0Error while authenticating user %s %s" % (username, e))
         return False

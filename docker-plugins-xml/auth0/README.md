@@ -35,12 +35,16 @@ reads the values from an `.env` file).
 You can either provide a `.env` file, fill in the correct credentials and store
 it in the container as `/var/www/.env` or directly edit the `settings.py` file.
 
+The client secret is not mandatory but it is recommended because it reduces
+the number of calls to the Auth0 API endpoint by decoding signed JWT tokens.
+
 A typical `.env` file looks like this:
 ```bash
 AUTH0_CLIENT_ID=your_client_id
 AUTH0_DOMAIN=your_domain.auth0.com
-
-# Activate for debug (not for production!)
+# Not mandatory but recommended:
+#AUTH0_CLIENT_SECRET=*******************************
+# Activate for debug (not for production!):
 #DEBUG=True
 ```
 

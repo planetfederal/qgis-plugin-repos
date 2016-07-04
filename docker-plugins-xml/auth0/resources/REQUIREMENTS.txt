@@ -3,8 +3,8 @@
 flask
 dotenv
 auth0-python
+PyJWT
 
 # Currently not necessary, but they were in the original examples and left here
 # because they can be useful in case of future enhancements
-#PyJWT
 #flask-cors
