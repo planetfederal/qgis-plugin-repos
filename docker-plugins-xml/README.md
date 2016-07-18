@@ -258,6 +258,19 @@ Go to HTTPS URLs and verify the same results as with HTTP access above:
 Additionally, the connection should be secured with a `*.boundless.test`
 wildcard certificate and there should be no SSL errors.
 
+
+#### Fully automated tests
+
+The directory `tests` contains a python test script that can be used
+to test the dockerized repository created with `test-build.run load`
+as explained in the [base manual][mdr].
+The list of Python requirements for the test script can be found in the file
+`resources/REQUIREMENTS.txt`.
+
+Start the tests from the command line with:
+
+    $> python endpoint_tests.py
+
 ## Plugin Repository Updating/Editing
 
 See the [README for the Python updater script][rus] in the **qgis-plugins-xml** code repository.

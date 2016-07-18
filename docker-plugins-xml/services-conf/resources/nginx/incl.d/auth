@@ -1,0 +1,4 @@
+# htpasswd based auth
+include incl.d/try_file-dir-index;
+auth_basic "Authentication Required";
+auth_basic_user_file htpasswd/htpasswd-qgis;

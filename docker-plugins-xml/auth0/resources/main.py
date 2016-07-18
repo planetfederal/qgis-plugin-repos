@@ -67,13 +67,7 @@ from flask import (
 
 
 from auth0.v2 import authentication, Auth0Error
-from settings import client_id, client_domain, client_secret, debug
-
-DESKTOP_USER_ROLES = [
-    'Registered',
-    'DesktopBasic',
-    'DesktopEnterprise',
-]
+import settings
 
 # Null or default role
 NULL_ROLE_INDEX = -1
@@ -108,7 +102,7 @@ def vjust(str, level=3, delim='.', bitsize=3, fillchar=' ', force_zero=False):
     return delim.join(parts)
 
 app = Flask(__name__)
-app.debug = debug
+app.debug = settings.debug
 
 
 @app.errorhandler(403)
@@ -141,7 +135,7 @@ def get_user_roles(access_token):
         message_log("Using cached user roles for token %s" % access_token)
     else:
         message_log("Fetching user roles for token %s" % access_token)
-        user_authentication = authentication.Users(client_domain)
+        user_authentication = authentication.Users(settings.client_domain)
         # Throttle
         for i in range(1, 4):
             user_info = user_authentication.userinfo(access_token)
@@ -175,8 +169,8 @@ def get_plugin_role_index(plugin_name):
     tree = etree.parse(os.path.join(xml_dir, 'plugins.xml'))
     try:
         plugin_element = tree.xpath('//file_name[text()="%s"]' % plugin_name)[0]
-        role_name = plugin_element.getparent().find('desktop_role').text
-        plugin_role_index = DESKTOP_USER_ROLES.index(role_name)
+        role_name = plugin_element.getparent().find('authorization_role').text
+        plugin_role_index = settings.AUTHORIZATION_USER_ROLES.index(role_name)
     except IndexError:
         message_log("Cannot find %s in plugins.xml" % plugin_name)
     except AttributeError, e:
@@ -199,21 +193,21 @@ def check_authentication(username, password):
     errors.
     """
     # Login
-    db_authentication = authentication.Database(client_domain)
+    db_authentication = authentication.Database(settings.client_domain)
     try:
-        response = db_authentication.login(client_id,
+        response = db_authentication.login(settings.client_id,
                                            username, password,
                                            'Username-Password-Authentication',
                                            scope='openid SiteRole')
         access_token = response.get('access_token')
         # Get the JWT token (optionally used if secret is specified)
-        if client_secret is not None:
+        if settings.client_secret is not None:
             try:
                 id_token = response.get('id_token')
                 payload = jwt.decode(
                     id_token,
-                    base64.b64decode(client_secret.replace("_","/").replace("-","+")),
-                    audience=client_id
+                    base64.b64decode(settings.client_secret.replace("_","/").replace("-","+")),
+                    audience=settings.client_id
                 )
                 message_log("Got payload %s from JWT: %s" % (payload, id_token))
                 user_roles = payload.get('SiteRole', '').split(',')
@@ -243,7 +237,7 @@ def authorize(user_roles, plugin_role_index):
     user_role_index =  NULL_ROLE_INDEX
     for role in user_roles:
         try:
-            user_role_index = DESKTOP_USER_ROLES.index(role)
+            user_role_index = settings.AUTHORIZATION_USER_ROLES.index(role)
         except ValueError:
             pass
     return user_role_index >= plugin_role_index

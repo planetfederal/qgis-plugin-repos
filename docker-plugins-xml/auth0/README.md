@@ -30,15 +30,15 @@ versions of the `test-*.sh` scripts in the same directory of the current
 ## Configuration
 
 **Auth0** credentials are stored in `settings.py` (the default implementation
-reads the values from an `.env` file).
+reads the values from an `~/.auth0.env` file).
 
-You can either provide a `.env` file, fill in the correct credentials and store
+You can either provide a `~/.auth0.env` file, fill in the correct credentials and store
 it in the container as `/var/www/.env` or directly edit the `settings.py` file.
 
 The client secret is not mandatory but it is recommended because it reduces
 the number of calls to the Auth0 API endpoint by decoding signed JWT tokens.
 
-A typical `.env` file looks like this:
+A typical `~/.auth0.env` file looks like this:
 ```bash
 AUTH0_CLIENT_ID=your_client_id
 AUTH0_DOMAIN=your_domain.auth0.com
@@ -58,7 +58,7 @@ in the file).
 
 ### Debugging
 
-To activate debug output from the server, set `DEBUG=True` in the `.env` file.
+To activate debug output from the server, set `DEBUG=True` in the `~/.auth0.env` file.
 
 If you also want to see the Python stack trace from uwsgi, add
 `--catch-exceptions` in `/etc/supervisor/conf.d/services.conf`:

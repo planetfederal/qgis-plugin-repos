@@ -1,23 +1,27 @@
 # Settings for the Auth0 endpoint
-# Default implementation reads the credentials from .env file
+# Default implementation reads the credentials from ~/.auth0.env file
 # Alternatively you can also directly set client_domain and client_id
 # in this file.
 
 import os
 
 env = None
-auth0env = os.path.join(os.path.expanduser("~"), '.auth0.env')
-
 
 try:
     from dotenv import Dotenv
-    if os.path.exists(auth0env):
-        env = Dotenv(auth0env)
-    else:
-        env = Dotenv('./.env')
-except IOError:
+    auth0env = os.path.join(os.path.expanduser("~"), '.auth0.env')
+    if not os.path.isfile(auth0env):
+        auth0env = '/home/uwsgi/.auth0.env'
+    env = Dotenv(auth0env)
+except (ImportError, IOError):
     env = os.environ
 
+# This is specific for Auth0 Boundless
+AUTHORIZATION_USER_ROLES = [
+    'Registered',
+    'DesktopBasic',
+    'DesktopEnterprise',
+]
 
 # The following two parameters are mandatory.
 client_domain = env["AUTH0_DOMAIN"]
