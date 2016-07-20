@@ -13,7 +13,7 @@ scp resources/main.py ${SSH_CONFIG_NAME}:/var/www
 scp resources/settings.py ${SSH_CONFIG_NAME}:/var/www
 scp resources/auth ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 scp resources/REQUIREMENTS.txt ${SSH_CONFIG_NAME}:/home/${SSH_USER}
-scp resources/setup-repo.sh  ${SSH_CONFIG_NAME}:/home/${SSH_USER}
+#scp resources/setup-repo.sh  ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 
 
 # Install all modifications and restart services
