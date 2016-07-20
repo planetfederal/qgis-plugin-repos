@@ -1,7 +1,7 @@
 #!/bin/bash
 
 QGIS_REPO=qgisrepo_data_1
-QGIS_ARCHIVE=qgis-repo-backup_$(date +%Y%m%d-%H%M%S).tgz
+QGIS_ARCHIVE=qgis-repo-www-backup_$(date +%Y%m%d-%H%M%S).tgz
 ARCHIVE_DIR=$HOME/qgis-repo-backup
 
 mkdir -p $ARCHIVE_DIR
