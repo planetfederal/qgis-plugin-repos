@@ -332,13 +332,13 @@ _separately_ as recommended in the documentation, see:
 
 Example scripts are provided to backup and upgrade a running repository:
 
-- [repo-backup.sh][rbu] - backs up running repo's `/var/www/qgis*` data to
-  `qgis-repo-backup_$(date +%Y%m%d-%H%M%S).tgz`
-- [repo-upgrade.sh][rup] - upgrades a running repo, backing up its
+- [repo-www-backup.sh][rbu] - backs up running repo's `/var/www/qgis*` data to
+  `qgis-repo-www-backup_$(date +%Y%m%d-%H%M%S).tgz`
+- [repo-www-upgrade.sh][rup] - upgrades a running repo, backing up its
   `/var/www/qgis*` data, then restoring it after upgrade
 
-[rbu]: ./repo-backup.sh
-[rup]: ./repo-upgrade.sh
+[rbu]: ./repo-www-backup.sh
+[rup]: ./repo-www-upgrade.sh
 
 
 ## Auth0 setup
