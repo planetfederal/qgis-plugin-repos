@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 PWWD=`pwd`
 cd .. && . ./docker-compose.env
 cd $PWWD
