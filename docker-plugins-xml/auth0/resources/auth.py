@@ -56,18 +56,17 @@ import jwt
 import base64
 
 from flask import (
-    Flask,
     request,
     Response,
     _request_ctx_stack,
     make_response,
-    send_from_directory,
     abort,
 )
 
 
 from auth0.v2 import authentication, Auth0Error
 import settings
+from main import app
 
 # Null or default role
 NULL_ROLE_INDEX = -1
@@ -100,9 +99,6 @@ def vjust(str, level=3, delim='.', bitsize=3, fillchar=' ', force_zero=False):
         else:
             parts.append(v.rjust(bitsize, fillchar))
     return delim.join(parts)
-
-app = Flask(__name__)
-app.debug = settings.debug
 
 
 @app.errorhandler(403)
@@ -298,37 +294,6 @@ def requires_auth(f):
     return decorated
 
 
-@app.route("/plugins.xml")
-@app.route("/plugins/plugins.xml")
-def filter_xml():
-    """
-    Filters plugins.xml removing incompatible plugins.
-    If no qgis parameter is found in the query string,
-    the whole plugins.xml file is served as is.
-    """
-    # Points to the real file, not the symlink
-    xml_dir = os.path.join(request.environ.get('DOCUMENT_ROOT', ''), 'plugins')
-    if not request.query_string:
-        return send_from_directory(xml_dir, 'plugins.xml')
-    elif request.args.get('qgis') is None:
-        abort(404)
-    else:
-        try:
-            xml = etree.parse(os.path.join(xml_dir, 'plugins.xml'))
-        except IOError:
-            return make_response("Cannot find plugins.xml", 404)
-        qgis_version = vjust(request.args.get('qgis'), force_zero=True)
-        for e in xml.xpath('//pyqgis_plugin'):
-            if not (vjust(e.find('qgis_minimum_version').text, force_zero=True)
-                    <= qgis_version and qgis_version
-                    <= vjust(e.find('qgis_maximum_version').text, force_zero=True)):
-                e.getparent().remove(e)
-        response = make_response(etree.tostring(xml, pretty_print=app.debug,
-                                                xml_declaration=True))
-        response.headers['Content-type'] = 'text/xml'
-        return response
-
-
 @app.route("/plugins/packages-auth/<string:plugin_name>", methods=['GET', 'POST'])
 @requires_auth
 def securedPlugins(plugin_name):
@@ -352,7 +317,3 @@ def securedPlugins(plugin_name):
     except IOError:
         abort(404)
     return response
-
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, port=8000)

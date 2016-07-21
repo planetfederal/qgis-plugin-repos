@@ -11,7 +11,7 @@ if [ -f ~/.auth0.env ]; then
     scp ~/.auth0.env ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 fi
 
-scp resources/main.py ${SSH_CONFIG_NAME}:/var/www
+scp resources/auth.py ${SSH_CONFIG_NAME}:/var/www
 scp resources/settings.py ${SSH_CONFIG_NAME}:/var/www
 scp resources/auth ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 scp resources/REQUIREMENTS.txt ${SSH_CONFIG_NAME}:/home/${SSH_USER}
@@ -24,7 +24,7 @@ LC_ALL="C" ssh -t ${SSH_CONFIG_NAME} "echo \"
 /opt/venv/bin/pip install -r /home/${SSH_USER}/REQUIREMENTS.txt
 mv /home/${SSH_USER}/auth /etc/nginx/incl.d/auth
 cp /etc/nginx/incl.d/auth /etc/nginx/incl.d/auth-dev
-/bin/bash chown ${SSH_USER}:users /var/www/main.py
+chown ${SSH_USER}:users /var/www/auth.py
 mkdir /home/uwsgi
 mv /home/${SSH_USER}/.auth0.env /home/uwsgi
 chown -R uwsgi /home/uwsgi
