@@ -14,6 +14,14 @@ docker-compose build
 echo -e "\nRunning detached containers..."
 docker-compose up -d
 
+
+CONTAINER_IP=`docker inspect --format "{{ .NetworkSettings.Networks.${COMPOSE_PROJECT_NAME}_default.IPAddress }}" ${COMPOSE_PROJECT_NAME}_base_1`
+
+echo "Container IP is ${CONTAINER_IP}"
+sed -i -e "s/172.[0-9]\+.0../${CONTAINER_IP}/g" ~/.ssh/config
+sudo sed -i -e "s/172.[0-9]\+.0../${CONTAINER_IP}/g" /etc/hosts
+
+
 if [ "$1" == "load" ]; then
   echo -e "\nRemotely loading test plugins..."
   sleep 5
