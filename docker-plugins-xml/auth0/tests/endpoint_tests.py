@@ -79,7 +79,8 @@ except IOError:
     env_err()
 
 
-XML_ENDPOINT='https://qgis.boundless.test/plugins/'
+
+XML_ENDPOINT = os.environ.get('XML_ENDPOINT', 'https://qgis.boundless.test/plugins/')
 
 try:
     DESKTOP_ROLE_ACCOUNTS = {
@@ -94,6 +95,17 @@ except KeyError:
 class TestAuth0Base(unittest.TestCase):
 
     _tokens_cache = {}
+    endpoint = XML_ENDPOINT
+    xml = None
+
+    def _get_download_ur(self, plugin_name, requires_auth=False):
+        """Get it from XML"""
+        if self.xml is None:
+            import xml.etree.ElementTree as ET
+            self.xml = ET.fromstring(self._do_get(self.endpoint + 'plugins.xml').read())
+        # Search the plugins name and get the URL
+        return [p for p in self.xml.findall('.//pyqgis_plugin') if p.find('file_name').text.find(plugin_name) != -1][0].find('download_url').text
+
 
     def _do_post(self, url, requires_auth=True, values={}, headers={}):
         """
@@ -156,9 +168,10 @@ class TestAuth0GET(TestAuth0Base):
         Test a valid request for a plugin that:
         - do not require authentication
         """
-        response = self._do_test(XML_ENDPOINT + '/packages/test_plugin_1.0.1.zip',
+        response = self._do_test(self._get_download_ur('test_plugin_1.0.1'),
                                  requires_auth=False)
-        self.assertEqual(len(response.read()), 4880)
+        self.assertGreater(len(response.read()), 4800)
+        self.assertLess(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
     def test_ValidAuthNoAuthRequired(self):
@@ -166,10 +179,11 @@ class TestAuth0GET(TestAuth0Base):
         Test a valid auth request for a plugin that:
         - do not require authentication
         """
-        response = self._do_test(XML_ENDPOINT + '/packages/test_plugin_1.0.1.zip',
+        response = self._do_test(self._get_download_ur('test_plugin_1.0.1'),
                                  *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'],
                                  requires_auth=False)
-        self.assertEqual(len(response.read()), 4880)
+        self.assertGreater(len(response.read()), 4800)
+        self.assertLess(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
 
@@ -181,13 +195,13 @@ class TestAuth0GET(TestAuth0Base):
         - requires no role
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip')
+            response = self._do_test(self._get_download_ur('test_plugin_3.0.1'))
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
         self.assertEqual(the_exception.getcode(), 401)
         # Wrong username and password
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip',
+            response = self._do_test(self._get_download_ur('test_plugin_3.0.1'),
                                      'wrong_username', 'wrong_password')
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
@@ -199,9 +213,9 @@ class TestAuth0GET(TestAuth0Base):
         - requires authentication
         - requires no role
         """
-        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_3.0.1.zip',
+        response = self._do_test(self._get_download_ur('test_plugin_3.0.1'),
                                  *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
-        self.assertEqual(len(response.read()), 5082)
+        self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
     #@unittest.skip("Auth0 locks")
@@ -212,13 +226,13 @@ class TestAuth0GET(TestAuth0Base):
         - require DesktopBasic authorization
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip')
+            response = self._do_test(self._get_download_ur('test_plugin_2.0.1'))
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
         self.assertEqual(the_exception.getcode(), 401)
         # Wrong username and password
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+            response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
                                      'wrong_username', 'wrong_password')
         the_exception = cm.exception
         self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
@@ -230,9 +244,9 @@ class TestAuth0GET(TestAuth0Base):
         - requires authentication
         - require DesktopBasic authorization
         """
-        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+        response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
                                  *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
-        self.assertEqual(len(response.read()), 5189)
+        self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
 
@@ -243,7 +257,7 @@ class TestAuth0GET(TestAuth0Base):
         - require DesktopBasic authorization
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+            response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
                                      *DESKTOP_ROLE_ACCOUNTS['Registered'])
         the_exception = cm.exception
         self.assertEqual(the_exception.getcode(), 403)
@@ -256,7 +270,7 @@ class TestAuth0GET(TestAuth0Base):
         - require DesktopEnterprise authorization
         """
         with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_4.0.1.zip',
+            response = self._do_test(self._get_download_ur('test_plugin_4.0.1'),
                                      *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
         the_exception = cm.exception
         self.assertEqual(the_exception.getcode(), 403)
@@ -268,9 +282,10 @@ class TestAuth0GET(TestAuth0Base):
         - requires authentication
         - require DesktopEnterprise authorization
         """
-        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_4.0.1.zip',
+        response = self._do_test(self._get_download_ur('test_plugin_4.0.1'),
                                  *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
-        self.assertEqual(len(response.read()), 2979)
+        self.assertGreater(len(response.read()), 2900)
+        self.assertLess(len(response.read()), 3000)
         self.assertEqual(response.getcode(), 200)
 
     def test_ValidAuthHigherRoleDesktopBasicRequired(self):
@@ -279,9 +294,9 @@ class TestAuth0GET(TestAuth0Base):
         - requires authentication
         - require DesktopEnterprise authorization
         """
-        response = self._do_test(XML_ENDPOINT + 'packages-auth/test_plugin_2.0.1.zip',
+        response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
                                  *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
-        self.assertEqual(len(response.read()), 5189)
+        self.assertGreater(len(response.read()), 5100)
         self.assertEqual(response.getcode(), 200)
 
 

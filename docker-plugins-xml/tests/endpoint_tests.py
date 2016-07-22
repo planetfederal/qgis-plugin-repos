@@ -51,8 +51,8 @@ PASSWORD = 'password'
 DEV_USERNAME = 'dev'
 DEV_PASSWORD = 'password'
 
-XML_ENDPOINT='https://qgis.boundless.test/plugins/'
-XML_DEV_ENDPOINT='https://qgis-dev.boundless.test/plugins/'
+XML_ENDPOINT = os.environ.get('XML_ENDPOINT', 'https://qgis.boundless.test/plugins/')
+XML_DEV_ENDPOINT = os.environ.get('XML_DEV_ENDPOINT', 'https://qgis-dev.boundless.test/plugins/'
 
 
 class TestAuthBase(unittest.TestCase):
