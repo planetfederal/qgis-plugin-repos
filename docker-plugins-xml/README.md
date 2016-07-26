@@ -341,6 +341,45 @@ Example scripts are provided to backup and upgrade a running repository:
 [rup]: ./repo-www-upgrade.sh
 
 
+## Logging
+
+The web server logs are stored in `~/supervisor_logs/`, mounted as a volume in
+the guest.
+
+Log rotate configuration for the host (replace `/home/user` with the real path
+to the user folder):
+
+    /home/user/supervisor_logs/nginx-*.log {
+        daily
+        size 1G
+        missingok
+        rotate 10
+        compress
+        delaycompress
+        notifempty
+        create 0640 nobody adm
+        sharedscripts
+        prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                        run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi \
+        endscript
+        postrotate
+                [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid`
+        endscript
+    }
+
+    /home/user/supervisor_logs/app-uwsgi-*.log {
+        copytruncate
+        daily
+        rotate 5
+        compress
+        delaycompress
+        missingok
+        notifempty
+    }
+
+
 ## Auth0 setup
 
 See the `README.md` file in `auth0` folder.

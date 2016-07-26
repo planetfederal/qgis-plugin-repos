@@ -35,3 +35,5 @@ services:
       - conf
       - data
     restart: on-failure:5
+    volumes:
+      - ~/supervisor_logs:/supervisor_logs

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z ~/supervisor_logs ]; then
+    mkdir ~/supervisor_logs
+    chmod 777 ~/supervisor_logs
+fi
+
 echo -e "\nApplying environment..."
 . docker-compose.env
 
