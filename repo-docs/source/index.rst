@@ -34,8 +34,6 @@ Browsing the repository
 
 - `Archives of released versions <https://qgis.boundlessgeo.com/plugins/packages>`_
 
-- `Archives of secured versions <https://qgis.boundlessgeo.com/plugins/packages-auth>`_ (requires authentication)
-
 Looking for something else?
 ---------------------------
 
