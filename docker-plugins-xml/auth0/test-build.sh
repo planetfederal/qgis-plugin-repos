@@ -4,7 +4,7 @@
 PWWD=`pwd`
 
 
-if [ -z ~/supervisor_logs ]; then
+if [ ! -d ~/supervisor_logs ]; then
     mkdir ~/supervisor_logs
     chmod 777 ~/supervisor_logs
 fi

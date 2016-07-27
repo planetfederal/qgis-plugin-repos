@@ -2,7 +2,7 @@
 # Example run: CUSTOM_APT_CATCHER_IP=172.17.0.2 CUSTOM_HTTP_PORT=8080 CUSTOM_HTTPS_PORT=8443  ./test-run.sh load
 PWWD=`pwd`
 
-if [ -z ~/supervisor_logs ]; then
+if [ ! -d ~/supervisor_logs ]; then
     mkdir ~/supervisor_logs
     chmod 777 ~/supervisor_logs
 fi
