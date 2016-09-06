@@ -187,7 +187,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertEqual(response.getcode(), 200)
 
 
-    @unittest.skip("Auth0 locks")
+    #@unittest.skip("Auth0 locks")
     def test_WrongAuthNoRoleRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -218,7 +218,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
-    @unittest.skip("Auth0 locks")
+    #@unittest.skip("Auth0 locks")
     def test_WrongAuthDesktopBasicRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -290,16 +290,14 @@ class TestAuth0GET(TestAuth0Base):
 
     def test_ValidAuthHigherRoleDesktopBasicRequired(self):
         """
-        Test that a valid auth/wrong (higher) role request for a plugin that
+        Test that a valid auth/role request for a plugin that
         - requires authentication
-        - require DesktopBasic authorization
+        - require DesktopBasic or DesktopEnterprise authorization
         """
-        with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
-                                     *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
-        the_exception = cm.exception
-        self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
-        self.assertEqual(the_exception.getcode(), 401)
+        response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
+        self.assertGreater(len(response.read()), 5000)
+        self.assertEqual(response.getcode(), 200)
 
 
 class TestAuth0POST(TestAuth0GET):
