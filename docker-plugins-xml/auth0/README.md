@@ -75,14 +75,18 @@ code repository for the base manual.
 [rus]: https://github.com/boundlessgeo/qgis-plugins-xml
 
 **Auth0** enabled repository accepts and extra string parameter `--role` that sets
-the minimum Auth0 role that will be able to download the plugin, for example::
+the Auth0 roles that will be able to download the plugin, for example::
 
     $> scp uploads/test_plugin_1.zip boundless.test:/opt/repo-updater/uploads/
 
-Run remote updater script on uploaded archive and set minimum role required for
+Run remote updater script on uploaded archive and set roles allowed to
 download to `DesktopBasic`:
 
     $> ssh boundless.test "/opt/repo-updater/plugins-xml/plugins-xml.sh update --role DesktopBasic test_plugin_1.zip"
+
+or, set multiple roles:
+
+    $> ssh boundless.test "/opt/repo-updater/plugins-xml/plugins-xml.sh update --role DesktopBasic,DesktopEnterprise test_plugin_1.zip"
 
 
 ## Installation

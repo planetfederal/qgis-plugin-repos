@@ -67,9 +67,8 @@ from flask import (
 from auth0.v2 import authentication, Auth0Error
 import settings
 from main import app
+app.debug = settings.debug
 
-# Null or default role
-NULL_ROLE_INDEX = -1
 
 def vjust(str, level=3, delim='.', bitsize=3, fillchar=' ', force_zero=False):
     """
@@ -121,7 +120,7 @@ def authenticate():
 
 def get_user_roles(access_token):
     """
-    Return the user Desktop roles (Registered, DesktopBasic, DesktopEnterprise)
+    Return the user Desktop roles set
     form user access_token.
     First check for cached values.
     """
@@ -130,6 +129,7 @@ def get_user_roles(access_token):
     if user_roles is not None:
         message_log("Using cached user roles for token %s" % access_token)
     else:
+        user_roles = []
         message_log("Fetching user roles for token %s" % access_token)
         user_authentication = authentication.Users(settings.client_domain)
         # Throttle
@@ -150,15 +150,16 @@ def get_user_roles(access_token):
             message_log("Returning empty user role")
             return []
     message_log("Returning user role %s" % user_roles)
-    return user_roles
+    # Always cast to set
+    return set(user_roles)
 
 
-def get_plugin_role_index(plugin_name):
+def get_plugin_roles(plugin_name):
     """
-    Retrieve the plugin role from the xml, default to -1 (null role)
+    Retrieve the plugin roles from the xml
     """
     # Default
-    plugin_role_index = NULL_ROLE_INDEX
+    plugin_roles = set()
     # Load xml from current folder
     # Points to the real file, not the symlink
     xml_dir = os.path.join(request.environ.get('DOCUMENT_ROOT', ''), 'plugins')
@@ -166,14 +167,14 @@ def get_plugin_role_index(plugin_name):
     try:
         plugin_element = tree.xpath('//file_name[text()="%s"]' % plugin_name)[0]
         role_name = plugin_element.getparent().find('authorization_role').text
-        plugin_role_index = settings.AUTHORIZATION_USER_ROLES.index(role_name)
+        plugin_roles = set(role_name.split(','))
     except IndexError:
         message_log("Cannot find %s in plugins.xml" % plugin_name)
     except AttributeError, e:
         message_log("Cannot find %s role in plugins.xml (%s)" % (plugin_name, e))
     except ValueError, e:
         message_log("Cannot find index for role in plugin %s (%s)" % (plugin_name, e))
-    return plugin_role_index
+    return plugin_roles
 
 
 def check_authentication(username, password):
@@ -224,19 +225,16 @@ def check_authentication(username, password):
         return False
     return True
 
-def authorize(user_roles, plugin_role_index):
+def authorize(user_roles, plugin_roles):
     """
-    The download is authorized if plugin roles
-    and user roles match.
+    The download is authorized if the plugin roles set is empty (the plugin does
+    not require any particular role to be downloaded) or if the plugin roles and
+    the user roles intersection is not empty.
     """
-    message_log("Comparing user roles  %s with index %s" % (user_roles, plugin_role_index))
-    user_role_index =  NULL_ROLE_INDEX
-    for role in user_roles:
-        try:
-            user_role_index = settings.AUTHORIZATION_USER_ROLES.index(role)
-        except ValueError:
-            pass
-    return user_role_index >= plugin_role_index
+    if not plugin_roles:
+        return True
+    message_log("Comparing user roles  %s with plugin roles %s" % (user_roles, plugin_roles))
+    return user_roles.intersection(plugin_roles)
 
 
 def requires_auth(f):
@@ -276,15 +274,15 @@ def requires_auth(f):
         # or other rules deny access to the requested resource
         if access_token is None:
             return authenticate()
-        plugin_role_index = get_plugin_role_index(kwargs.get('plugin_name'))
-        message_log("Got plugin role index: %s" % plugin_role_index)
+        plugin_roles = get_plugin_roles(kwargs.get('plugin_name'))
+        message_log("Got plugin roles: %s" % plugin_roles)
         try:
             user_roles = get_user_roles(access_token)
             message_log("Got user roles: %s" % user_roles)
         except Auth0Error, e:
             message_log("Auth0Error - Returning 403: %s" % e)
             return abort(403)
-        if not authorize(user_roles, plugin_role_index):
+        if not authorize(user_roles, plugin_roles):
             message_log("Not authorized - Returning 403")
             return abort(403)
         # Set for debug

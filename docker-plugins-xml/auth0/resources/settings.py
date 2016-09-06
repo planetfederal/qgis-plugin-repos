@@ -16,13 +16,6 @@ try:
 except (ImportError, IOError):
     env = os.environ
 
-# This is specific for Auth0 Boundless
-AUTHORIZATION_USER_ROLES = [
-    'Registered',
-    'DesktopBasic',
-    'DesktopEnterprise',
-]
-
 # The following two parameters are mandatory.
 client_domain = env["AUTH0_DOMAIN"]
 client_id = env["AUTH0_CLIENT_ID"]

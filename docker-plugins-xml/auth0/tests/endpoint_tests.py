@@ -8,13 +8,13 @@
  Performs GET/POST and token tests on a test repository endpoint loaded
  with the test plugins as explained in the README.md
 
- WARNING: the wrong credentials tests are disabled (skipped) to avoid Auth0
+ WARNING: the wrong credentials tests must be disabled (skipped) to avoid Auth0
           IP and account locks.
 
  Test matrix
- plugin      auth required       min role
+ plugin      auth required       role
  1           no                  -
- 2           yes                 DesktopBasic
+ 2           yes                 DesktopBasic,DesktopEnterprise
  3           yes                 -
  4           yes                 DesktopEnterprise
 
@@ -187,7 +187,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertEqual(response.getcode(), 200)
 
 
-    #@unittest.skip("Auth0 locks")
+    @unittest.skip("Auth0 locks")
     def test_WrongAuthNoRoleRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -218,7 +218,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
-    #@unittest.skip("Auth0 locks")
+    @unittest.skip("Auth0 locks")
     def test_WrongAuthDesktopBasicRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -290,14 +290,16 @@ class TestAuth0GET(TestAuth0Base):
 
     def test_ValidAuthHigherRoleDesktopBasicRequired(self):
         """
-        Test that a valid auth/higher role request for a plugin that
+        Test that a valid auth/wrong (higher) role request for a plugin that
         - requires authentication
-        - require DesktopEnterprise authorization
+        - require DesktopBasic authorization
         """
-        response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
-                                 *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
-        self.assertGreater(len(response.read()), 5100)
-        self.assertEqual(response.getcode(), 200)
+        with self.assertRaises(urllib2.HTTPError) as cm:
+            response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
+                                     *DESKTOP_ROLE_ACCOUNTS['DesktopEnterprise'])
+        the_exception = cm.exception
+        self.assertEqual(the_exception.msg, 'UNAUTHORIZED')
+        self.assertEqual(the_exception.getcode(), 401)
 
 
 class TestAuth0POST(TestAuth0GET):
