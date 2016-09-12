@@ -48,6 +48,56 @@ AUTH0_DOMAIN=your_domain.auth0.com
 #DEBUG=True
 ```
 
+### Retrieveing user informations
+
+An additional endpoint allows to retrieve the user profile
+and user roles in `json` format and can be used to check if
+the user credentials are valid.
+
+To retrieve the user profile, send an authenticated request using
+the user's credentials to:
+```
+    /api/user_profile
+```
+
+The user profile response for a valid user looks like the following:
+```
+{
+    "picture": "https://s.gravatar.com/avatar/5fbc989894f376c61b8152b5f52e9ac25?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fqg.png",
+    "user_id": "auth0|571dasjsdha7878sadaef",
+    "name": "auser@boundlessgeo.com",
+    "updated_at": "2016-09-12T12:40:24.145Z",
+    "email_verified": true,
+    "SiteRole": "Suite,DesktopBasic",
+    "identities": [{"isSocial": false,
+        "connection": "Username-Password-Authentication",
+        "user_id": "uidsad97asdassd",
+        "provider": "auth0"}],
+    "clientID": "adasdT545fweTREGa008",
+    "app_metadata": {"SiteRole": "Suite,DesktopBasic"},
+    "created_at": "2016-04-22T18:46:39.807Z",
+    "last_password_reset": "2016-04-28T15:04:13.013Z",
+    "nickname": "qgis-basic",
+    "email": "qgis-basic@boundlessgeo.com",
+    "sub": "auth0|571dasjsdha7878sadaef"
+}
+```
+
+
+To retrieve the user roles, send an authenticated request using
+the user's credentials to:
+```
+    /api/user_roles
+```
+
+The user roles response for a valid user looks like the following:
+```
+﻿⁠⁠⁠⁠["Suite", "DesktopBasic"]
+```
+
+
+In case the user credentials are not valid the server will issue a `401` HTTP error.
+
 ### Caching of user roles
 
 User roles are cached to avoid `Too many requests` HTTP responses from Auth0

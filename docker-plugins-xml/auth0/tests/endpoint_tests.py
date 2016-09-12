@@ -47,6 +47,7 @@ Tested Authentication methods:
 import sys
 import os
 
+import json
 import unittest
 import urllib
 import urllib2
@@ -79,8 +80,8 @@ except IOError:
     env_err()
 
 
-
 XML_ENDPOINT = os.environ.get('XML_ENDPOINT', 'https://qgis.boundless.test/plugins/')
+API_ENDPOINT = os.environ.get('API_ENDPOINT', 'https://qgis.boundless.test/api/')
 
 try:
     DESKTOP_ROLE_ACCOUNTS = {
@@ -96,6 +97,7 @@ class TestAuth0Base(unittest.TestCase):
 
     _tokens_cache = {}
     endpoint = XML_ENDPOINT
+    api_endpoint = API_ENDPOINT
     xml = None
 
     def _get_download_ur(self, plugin_name, requires_auth=False):
@@ -186,8 +188,31 @@ class TestAuth0GET(TestAuth0Base):
         self.assertLess(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
+    def test_ValidAuthUserProfile(self):
+        """
+        Test a valid auth request for a user profile
+        """
+        response = self._do_test(self.api_endpoint + 'user_profile',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'],
+                                 requires_auth=True)
+        self.assertEqual(response.getcode(), 200)
+        text = response.read()
+        response_j = json.loads(text)
+        self.assertTrue(response_j.get('SiteRole').find('DesktopBasic') != -1)
 
-    #@unittest.skip("Auth0 locks")
+    def test_ValidAuthUserRoles(self):
+        """
+        Test a valid auth request for a user roles
+        """
+        response = self._do_test(self.api_endpoint + 'user_roles',
+                                 *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'],
+                                 requires_auth=True)
+        self.assertEqual(response.getcode(), 200)
+        text = response.read()
+        response_j = json.loads(text)
+        self.assertEquals(response_j,  [u'Suite', u'DesktopBasic'])
+
+    @unittest.skip("Auth0 locks")
     def test_WrongAuthNoRoleRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -218,7 +243,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
-    #@unittest.skip("Auth0 locks")
+    @unittest.skip("Auth0 locks")
     def test_WrongAuthDesktopBasicRequired(self):
         """
         Test that a wrong auth request for a plugin that

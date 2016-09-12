@@ -40,11 +40,9 @@ __date__ = 'April 2016 '
 
 # Configuration:
 CACHE_TIMEOUT = 60
-from werkzeug.contrib.cache import SimpleCache as RolesCache
-roles_cache = RolesCache()
-# Or better:
-#from werkzeug.contrib.cache import MemcachedCache
-#roles_cache = MemcachedCache(['127.0.0.1:11211'])
+from werkzeug.contrib.cache import SimpleCache as AuthCache
+profiles_cache = AuthCache()
+roles_cache = AuthCache()
 # End configuration
 
 import os
@@ -117,40 +115,53 @@ def authenticate():
         'You have to login with proper credentials', 401,
         {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
-
-def get_user_roles(access_token):
+def get_user_profile(access_token):
     """
-    Return the user Desktop roles set
-    form user access_token.
+    Return and caches the user Profile from user access_token.
     First check for cached values.
     """
-    message_log("Retrieving user role for token %s" % access_token)
-    user_roles = roles_cache.get(access_token)
-    if user_roles is not None:
-        message_log("Using cached user roles for token %s" % access_token)
+    message_log("Retrieving user profile for token %s" % access_token)
+    user_profile = profiles_cache.get(access_token)
+    if user_profile is not None:
+        message_log("Using cached user profile for token %s" % access_token)
     else:
-        user_roles = []
-        message_log("Fetching user roles for token %s" % access_token)
+        message_log("Fetching user profile for token %s" % access_token)
         user_authentication = authentication.Users(settings.client_domain)
         # Throttle
         for i in range(1, 4):
-            user_info = user_authentication.userinfo(access_token)
-            if user_info == 'Too Many Requests':
+            user_profile = user_authentication.userinfo(access_token)
+            if user_profile == 'Too Many Requests':
                 message_log("Too many requests: throttling (%s seconds) for token %s" % (i*2, access_token))
                 time.sleep(i*2)
             else:
                 break
-        if user_info == 'Unauthorized':
-            raise Auth0Error(user_info)
+        if user_profile == 'Unauthorized':
+            raise Auth0Error(user_profile)
         try:
-            user_info_j = json.loads(user_info).get("SiteRole")
-            user_roles = user_info_j.split(',')
-            roles_cache.set(access_token, user_roles, timeout=CACHE_TIMEOUT)
+            user_profile = json.loads(user_profile)
+            profiles_cache.set(access_token, user_profile, timeout=CACHE_TIMEOUT)
         except ValueError:
-            message_log("Returning empty user role")
-            return []
-    message_log("Returning user role %s" % user_roles)
+            message_log("Returning empty user profile")
+            return False
+    message_log("Returning user profile %s" % user_profile)
+    return user_profile
+
+
+def get_user_roles(access_token):
+    """
+    Return the user Desktop roles set from user access_token.
+    """
+    user_roles = roles_cache.get(access_token)
+    if user_roles:
+        return set(user_roles)
+    user_profile = get_user_profile(access_token)
+    if not user_profile:
+        return set()
+    user_info_j = user_profile.get("SiteRole")
+    user_roles = user_info_j.split(',')
+    roles_cache.set(access_token, user_roles, timeout=CACHE_TIMEOUT)
     # Always cast to set
+    message_log("Returning user role %s" % user_roles)
     return set(user_roles)
 
 
@@ -208,7 +219,7 @@ def check_authentication(username, password):
                 )
                 message_log("Got payload %s from JWT: %s" % (payload, id_token))
                 user_roles = payload.get('SiteRole', '').split(',')
-                message_log("Got access_token %s and roles %s for user %s" % (access_token, user_roles, username))
+                message_log("Got access_token %s and user roles %s for user %s" % (access_token, user_roles, username))
                 # Store user roles for authorization
                 roles_cache.set(access_token, user_roles, timeout=CACHE_TIMEOUT)
             except jwt.exceptions.DecodeError, e:
@@ -274,22 +285,49 @@ def requires_auth(f):
         # or other rules deny access to the requested resource
         if access_token is None:
             return authenticate()
-        plugin_roles = get_plugin_roles(kwargs.get('plugin_name'))
-        message_log("Got plugin roles: %s" % plugin_roles)
-        try:
-            user_roles = get_user_roles(access_token)
-            message_log("Got user roles: %s" % user_roles)
-        except Auth0Error, e:
-            message_log("Auth0Error - Returning 403: %s" % e)
-            return abort(403)
-        if not authorize(user_roles, plugin_roles):
-            message_log("Not authorized - Returning 403")
-            return abort(403)
-        # Set for debug
+
+        # If it's a plugin download:
+        if 'plugin_name' in kwargs:
+            plugin_roles = get_plugin_roles(kwargs.get('plugin_name'))
+            message_log("Got plugin roles: %s" % plugin_roles)
+            try:
+                user_roles = get_user_roles(access_token)
+                message_log("Got user roles: %s" % user_roles)
+            except Auth0Error, e:
+                message_log("Auth0Error: Forbidden - Returning 403: %s" % e)
+                return abort(403)
+            if not authorize(user_roles, plugin_roles):
+                message_log("Forbidden - Returning 403")
+                return abort(403)
+
         _request_ctx_stack.top.current_user_token = access_token
         message_log("Returning from requires_auth decorator")
         return f(*args, **kwargs)
     return decorated
+
+@app.route("/api/user_profile", methods=['GET', 'POST'])
+@requires_auth
+def user_profile():
+    """
+    Return the user profile in JSON format.
+    """
+    access_token = _request_ctx_stack.top.current_user_token
+    message_log("Got access token for user profile")
+    user_profile = get_user_profile(access_token)
+    return json.dumps(user_profile)
+
+
+
+@app.route("/api/user_roles", methods=['GET', 'POST'])
+@requires_auth
+def user_roles():
+    """
+    Return the user roles in JSON format.
+    """
+    access_token = _request_ctx_stack.top.current_user_token
+    message_log("Got access token for user roles")
+    user_roles = get_user_roles(access_token)
+    return json.dumps(list(user_roles))
 
 
 @app.route("/plugins/packages-auth/<string:plugin_name>", methods=['GET', 'POST'])

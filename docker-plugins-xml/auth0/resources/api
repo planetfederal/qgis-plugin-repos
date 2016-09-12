@@ -1,0 +1,11 @@
+  # The API in this folder needs authentication
+  # and authorization, HTTPS is required
+  # The repo-specific auth configuration is read from inc.d/auth
+  location /api {
+    # Require HTTPS
+    include incl.d/redirect_to_https;
+    # Include the authorization configuration
+    # API is handled by Flask app
+    include uwsgi_params;
+    uwsgi_pass unix:///tmp/uwsgi.sock;
+  }
