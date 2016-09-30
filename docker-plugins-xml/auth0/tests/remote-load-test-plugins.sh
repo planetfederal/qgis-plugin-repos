@@ -39,16 +39,16 @@ done
 for zp in test_plugin_2.zip
 do
   scp ${zp} ${SSH_HOST}:${UPLOADS}
-  ssh ${SSH_HOST} "${UPDATER} update --role DesktopEnterprise,DesktopBasic ${zp}"
+  ssh ${SSH_HOST} "${UPDATER} update --role 'Registered Users,DesktopEnterprise,DesktopBasic' ${zp}"
   scp ${zp} ${SSH_HOST}:${UPLOADS}
-  ssh ${SSH_HOST} "${UPDATER} update --dev --role DesktopEnterprise,DesktopBasic ${zp}"
+  ssh ${SSH_HOST} "${UPDATER} update --dev --role 'DesktopEnterprise,DesktopBasic' ${zp}"
 done
 
 # Role based authorization DesktopEnterprise
 for zp in test_plugin_4.zip
 do
   scp ${zp} ${SSH_HOST}:${UPLOADS}
-  ssh ${SSH_HOST} "${UPDATER} update --role DesktopEnterprise ${zp}"
+  ssh ${SSH_HOST} "${UPDATER} update --role 'DesktopEnterprise' ${zp}"
   scp ${zp} ${SSH_HOST}:${UPLOADS}
-  ssh ${SSH_HOST} "${UPDATER} update --dev --role DesktopEnterprise ${zp}"
+  ssh ${SSH_HOST} "${UPDATER} update --dev --role 'DesktopEnterprise' ${zp}"
 done

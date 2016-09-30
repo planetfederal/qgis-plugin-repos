@@ -14,7 +14,7 @@
  Test matrix
  plugin      auth required       role
  1           no                  -
- 2           yes                 DesktopBasic,DesktopEnterprise
+ 2           yes                 Registered Users,DesktopBasic,DesktopEnterprise
  3           yes                 -
  4           yes                 DesktopEnterprise
 
@@ -61,7 +61,7 @@ def env_err():
     """Print the env error message and die"""
     print("A .env file with sample accounts is needed to run this tests.")
     print("""The .env must contain the Auth0 configuration and:
-QGIS_FREE_USERNAME=********* # with Registered permissions
+QGIS_FREE_USERNAME=********* # with Registered Users permissions
 QGIS_FREE_PASSWORD=*********
 QGIS_BASIC_USERNAME=******** # with DesktopBasic and Suite permissions
 QGIS_BASIC_PASSWORD=********
@@ -85,7 +85,7 @@ API_ENDPOINT = os.environ.get('API_ENDPOINT', 'https://qgis.boundless.test/api/'
 
 try:
     DESKTOP_ROLE_ACCOUNTS = {
-      'Registered': (env['QGIS_FREE_USERNAME'], env['QGIS_FREE_PASSWORD']),
+      'Registered Users': (env['QGIS_FREE_USERNAME'], env['QGIS_FREE_PASSWORD']),
       'DesktopBasic': (env['QGIS_BASIC_USERNAME'], env['QGIS_BASIC_PASSWORD']),
       'DesktopEnterprise' : (env['QGIS_ENTERPRISE_USERNAME'], env['QGIS_ENTERPRISE_PASSWORD']),
     }
@@ -210,9 +210,9 @@ class TestAuth0GET(TestAuth0Base):
         self.assertEqual(response.getcode(), 200)
         text = response.read()
         response_j = json.loads(text)
-        self.assertEquals(response_j,  [u'Suite', u'DesktopBasic'])
+        self.assertEquals(response_j,  [u'Registered Users', u'Suite', u'DesktopBasic'])
 
-    @unittest.skip("Auth0 locks")
+    #@unittest.skip("Auth0 locks")
     def test_WrongAuthNoRoleRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -243,7 +243,7 @@ class TestAuth0GET(TestAuth0Base):
         self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
 
-    @unittest.skip("Auth0 locks")
+    #@unittest.skip("Auth0 locks")
     def test_WrongAuthDesktopBasicRequired(self):
         """
         Test that a wrong auth request for a plugin that
@@ -273,20 +273,6 @@ class TestAuth0GET(TestAuth0Base):
                                  *DESKTOP_ROLE_ACCOUNTS['DesktopBasic'])
         self.assertGreater(len(response.read()), 5000)
         self.assertEqual(response.getcode(), 200)
-
-
-    def test_ValidAuthWrongRoleDesktopBasicRequired(self):
-        """
-        Test that a valid auth/wrong role request for a plugin that
-        - requires authentication
-        - require DesktopBasic authorization
-        """
-        with self.assertRaises(urllib2.HTTPError) as cm:
-            response = self._do_test(self._get_download_ur('test_plugin_2.0.1'),
-                                     *DESKTOP_ROLE_ACCOUNTS['Registered'])
-        the_exception = cm.exception
-        self.assertEqual(the_exception.getcode(), 403)
-        self.assertEqual(the_exception.msg, 'FORBIDDEN')
 
     def test_ValidAuthWrongRoleDesktopEnterpriseRequired(self):
         """
