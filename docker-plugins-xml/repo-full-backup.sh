@@ -5,11 +5,12 @@ set -e
 QGIS_BASE=qgisrepo_base_1
 QGIS_ARCHIVE=qgis-repo-full-backup_$(date +%Y%m%d-%H%M%S).tgz
 ARCHIVE_DIR=$HOME/qgis-repo-backup
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p $ARCHIVE_DIR
 
 echo -e "\nApplying environment..."
-. docker-compose.env
+. ${SCRIPT_DIR}/docker-compose.env
 
 echo -e "\nAttempting to back up ${QGIS_BASE}'s dirs with data to \n$ARCHIVE_DIR/${QGIS_ARCHIVE}..."
 docker exec $QGIS_BASE \
