@@ -1,0 +1,27 @@
+---
+
+domain: cfapps.io
+
+applications:
+- name: plugins-server
+  path: ./plugins_server/
+  memory: 128MB
+  disk_quota: 256MB
+  #random-route: true
+  buildpack: python_buildpack
+  command: python main.py
+  services:
+   - myredis
+  host: plugins-server
+- name: plugins-admin
+  path: ./plugins_admin/
+  memory: 128MB
+  disk_quota: 256MB
+  buildpack: python_buildpack
+  command: python main.py
+  services:
+   - myredis
+  host: plugins-admin
+  env:
+    USERNAME: admin
+    PASSWORD: password

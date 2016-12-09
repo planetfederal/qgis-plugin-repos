@@ -1,0 +1,16 @@
+{% extends "root.html" %}
+{%- block inner %}
+{{super()}}
+<h1>Upload new plugin</h1>
+<div class="alert alert-warning" role="alert">
+Please note that if a plugin with the same name and version already exists it will be silently overwritten.
+</div>
+<form action="" method=post enctype=multipart/form-data>
+    <div class="form-group">
+        <label for="exampleInputFile">Plugin upload</label>
+        <input type="file"  name=file>
+        <p class="help-block">Upload the compressed ZIP file that contains your plugin.</p>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Plugin Admin{% endblock %}
+{% block head %}
+{{super()}}
+<style type="text/css">
+    body {
+        padding-top: 50px;
+    }
+</style>
+{% endblock %}
+{% block navbar %}
+{% include "navbar.html" %}
+{% endblock %}
+
+{%- block content %}
+<div class="container">
+  {% if message %}
+  <div class="alert alert-info">
+      {{ message }}
+  </div>
+  {% endif %}
+  {% block inner %}{% endblock %}
+</div>
+{%- endblock content %}

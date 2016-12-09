@@ -1,5 +1,3 @@
 # Redirects the home page to the connect portal plugins documentation page
-# Note that this URL is version specific and will need to be updated any
-# time a new Boundless Desktop version is released.
 
-rewrite ^$ https://connect.boundlessgeo.com/docs/desktop/latest/plugins/plugin_repo.html permanent;
+rewrite ^/$ https://connect.boundlessgeo.com/docs/desktop/latest/plugins/plugin_repo.html permanent;
