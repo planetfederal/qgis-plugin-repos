@@ -3,3 +3,4 @@ gunicorn
 redis
 nose
 flask-bootstrap
+flask-restful

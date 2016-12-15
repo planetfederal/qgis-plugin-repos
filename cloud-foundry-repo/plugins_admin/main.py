@@ -10,20 +10,22 @@ Author: Alessandro Pasotti
 """
 import os
 import re
+import base64
 from functools import wraps
-from flask import Flask, request, make_response, Response
+from flask import Flask, request, make_response, Response, abort
 from flask import render_template
 from flask_bootstrap import Bootstrap
 from plugin import Plugin
 from plugin_exceptions import DoesNotExist
 from werkzeug.utils import secure_filename
-
+from flask_restful import Resource, Api
 
 # Get port from environment variable or choose 9099 as local default
 port = int(os.getenv("PORT", 9099))
 
 app = Flask(__name__)
 Bootstrap(app)
+api = Api(app)
 
 
 def check_auth(username, password):
@@ -69,11 +71,15 @@ def plugins_list():
 @requires_auth
 def plugin_details(key):
     message = None
-    plugin = Plugin(key)
+    try:
+        plugin = Plugin(key)
+    except DoesNotExist:
+        return render_error('<b>{}</b> does not exists'.format(key))
     return render_template('details.html',
                            title="{} - ver. {}".format(plugin.name, plugin.version),
                            plugin=plugin,
                            message=message)
+
 
 @app.route('/delete/<key>', methods=['GET', 'POST'])
 @requires_auth
@@ -86,7 +92,7 @@ def plugin_delete(key):
             title = 'Plugin {} version {} deleted'.format(plugin.name, plugin.version)
             plugin.delete(key)
         except DoesNotExist:
-            return render_error('{} does not exists'.format(key))
+            return render_error('<b>{}</b> does not exists'.format(key))
     else:
         try:
             plugin = Plugin(key)
@@ -111,10 +117,10 @@ def plugin_download(key):
         response = make_response(plugin.blob)
         response.headers['Content-Type'] = 'application/zip'
         response.headers['Content-Disposition'] = \
-            'inline; filename=%s.zip' % re.sub("[^A-z0-9]", '_', plugin.get_key())
+            'inline; filename=%s.zip' % re.sub("[^A-z0-9]", '_', plugin.key)
         return response
     except DoesNotExist:
-        return render_error('{} does not exists'.format(key))
+        return render_error('<b>{}</b> does not exists'.format(key))
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -157,6 +163,58 @@ def plugins_xml():
 def plugins_xsl():
     """Create the XML file"""
     return app.send_static_file('plugins.xsl')
+
+################################################################################
+# REST API
+#
+
+
+class PluginMetadata(Resource):
+    @requires_auth
+    def get(self, key, metadata_key):
+        try:
+            plugin = Plugin(key)
+        except DoesNotExist:
+            abort(404)
+        return {metadata_key: getattr(plugin, metadata_key) }
+
+    @requires_auth
+    def post(self, key, metadata_key):
+        try:
+            plugin = Plugin(key)
+        except DoesNotExist:
+            abort(404)
+
+        metadata_value = request.data
+        plugin.set_metadata(metadata_key, metadata_value)
+        # Re-read
+        plugin = Plugin(plugin.key)
+        return {metadata_key: getattr(plugin, metadata_key) }
+
+api.add_resource(PluginMetadata, '/rest/metadata/<string:key>/<string:metadata_key>')
+
+class PluginPackage(Resource):
+    @requires_auth
+    def get(self, key):
+        try:
+            plugin = Plugin(key)
+        except DoesNotExist:
+            abort(404)
+        return {key: base64.b64encode(plugin.blob)}
+
+    @requires_auth
+    def post(self):
+        return {'result': 'success'}
+
+api.add_resource(PluginPackage, '/rest/package/<string:key>')
+
+class PluginList(Resource):
+    @requires_auth
+    def get(self):
+        return {'plugins': {p.key: p.metadata for p in Plugin.all()}}
+
+api.add_resource(PluginList, '/rest/plugins')
+
 
 
 if __name__ == '__main__':

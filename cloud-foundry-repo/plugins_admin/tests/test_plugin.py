@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+#
+# (c) 2016 Boundless, http://boundlessgeo.com
+# This code is licensed under the GPL 2.0 license.
+#
+"""
+Test the Plugin class
+Author: Alessandro Pasotti
+
+"""
 import os
 import sys
 import unittest
@@ -11,27 +21,34 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 class PluginTestCase(unittest.TestCase):
 
     def setUp(self):
-        pass
+        for p in Plugin.all():
+            p.delete(p.key)
 
     def tearDown(self):
         pass
 
+    def load_from_zip(self, version=1):
+        plugin_path = os.path.join(DATA_DIR, 'test_plugin_%s.zip'  % version)
+        zip_file = open(plugin_path, 'rb')
+        plugin = Plugin.create_from_zip(zip_file)
+        self.assertIsNotNone(Plugin(plugin.key))
+        return plugin
+
     def test_make_key(self):
         self.assertEqual(Plugin.make_key('uno', 'due'), 'Plugin:uno:due')
 
-    def test_create_from_zip(self):
+    def test_load_from_zip(self):
         """
         Create a Plugin from a zip file
         """
         # Make plugin
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_1.zip')
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
+        plugin = self.load_from_zip()
         # Check that the plugin is in the database
-        key = plugin.get_key()
+        key = plugin.key
         self.assertIsNotNone(Plugin(key))
 
         # Check that the plugin is the same binary blob
+        plugin_path = os.path.join(DATA_DIR, 'test_plugin_%s.zip'  % 1)
         my_zip = open(plugin_path, 'rb')
         plugin_content = my_zip.read()
         self.assertEqual(plugin.blob, plugin_content)
@@ -62,11 +79,9 @@ class PluginTestCase(unittest.TestCase):
         self.assertRaises(DoesNotExist, load_deleted)
 
     def test_set_metadata(self):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_1.zip')
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
+        plugin = self.load_from_zip()
         # Check that the plugin is in the database
-        key = plugin.get_key()
+        key = plugin.key
         self.assertIsNotNone(Plugin(key))
         self.assertEqual(plugin.metadata['homepage'], 'http://boundlessgeo.com')
         plugin.set_metadata('homepage', 'http://my.new.homepage')
@@ -75,47 +90,84 @@ class PluginTestCase(unittest.TestCase):
         # Check blob metadata
         metadata = dict(validator(StringIO(plugin.blob)))
         self.assertEqual(plugin.metadata['homepage'], metadata['homepage'])
-        plugin.delete(key)
 
 
     def test_set_version(self):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_1.zip')
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
+        plugin = self.load_from_zip()
         # Check that the plugin is in the database
-        key = plugin.get_key()
+        key = plugin.key
         self.assertIsNotNone(Plugin(key))
         plugin.set_metadata('version', '123.34')
         def load_deleted():
             Plugin(key)
         self.assertRaises(DoesNotExist, load_deleted)
-        plugin = Plugin(plugin.get_key())
+        plugin = Plugin(plugin.key)
         self.assertEqual(plugin.version, '123.34')
         metadata = dict(validator(StringIO(plugin.blob)))
         self.assertEqual(plugin.metadata['version'], metadata['version'])
         self.assertEqual(plugin.metadata['version'], '123.34')
-        plugin.delete(plugin.get_key())
 
     def test_getter_metadata(self):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_1.zip')
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
+        plugin = self.load_from_zip()
         # Check that the plugin is in the database
-        key = plugin.get_key()
+        key = plugin.key
         self.assertIsNotNone(Plugin(key))
         self.assertEqual(plugin.metadata['homepage'], 'http://boundlessgeo.com')
         self.assertEqual(plugin.metadata['homepage'], plugin.homepage)
-        plugin.delete(key)
 
     def test_getter_metadata_empty(self):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_1.zip')
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
+        plugin = self.load_from_zip()
         # Check that the plugin is in the database
-        key = plugin.get_key()
+        key = plugin.key
         self.assertIsNotNone(Plugin(key))
         self.assertEquals(plugin.not_exists, '')
-        plugin.delete(key)
+
+    def test_plugin_version(self):
+        """Test that only the compatible plugins are returned by all(version)
+
+        Test versions:
+        test_plugin_1/metadata.txt:qgisMinimumVersion=2.0
+        test_plugin_2/metadata.txt:qgisMinimumVersion=2.14
+        test_plugin_3/metadata.txt:qgisMinimumVersion=2.0
+        test_plugin_4/metadata.txt:qgisMinimumVersion=2.16
+        test_plugin_5/metadata.txt:qgisMinimumVersion=2.1
+        test_plugin_5/metadata.txt:qgisMaximumVersion=2.3
+
+        test_plugin_1/metadata.txt:version=0.1
+        test_plugin_2/metadata.txt:version=0.1
+        test_plugin_3/metadata.txt:version=0.1
+        test_plugin_4/metadata.txt:version=0.1
+        test_plugin_5/metadata.txt:version=0.1
+
+        """
+
+        for i in range(1, 6):
+            self.load_from_zip(i)
+
+        def _check_key(i, version):
+            key = Plugin.make_key('Test Plugin %s' % i, '0.1' )
+            return key in [p.key for p in Plugin.all(version=version)]
+
+
+        self.assertTrue(_check_key(1, '2.0'))
+        self.assertTrue(_check_key(1, '2.99'))
+        self.assertFalse(_check_key(1, '3.0'))
+        self.assertFalse(_check_key(1, '1.9'))
+
+        self.assertFalse(_check_key(2, '2.0'))
+        self.assertTrue(_check_key(2, '2.14'))
+        self.assertTrue(_check_key(2, '2.99'))
+        self.assertFalse(_check_key(2, '3.0'))
+        self.assertFalse(_check_key(2, '1.9'))
+
+        self.assertFalse(_check_key(5, '2.0'))
+        self.assertTrue(_check_key(5, '2.1'))
+        self.assertTrue(_check_key(5, '2.2'))
+        self.assertTrue(_check_key(5, '2.3'))
+        self.assertFalse(_check_key(5, '2.4'))
+        self.assertFalse(_check_key(5, '2.99'))
+        self.assertFalse(_check_key(5, '3.0'))
+        self.assertFalse(_check_key(5, '1.9'))
 
 if __name__ == '__main__':
     unittest.main()

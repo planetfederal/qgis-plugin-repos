@@ -19,15 +19,11 @@ Support plugin listing, deletion and upload.
 https://plugins-admin.cfapps.io
 
 
-TODO: metdata editing (API is already in place)
-
 ## Plugin XML server
 
 Serves the plugins XML
 
-https://plugins-server.cfapps.io
-
-TODO: filtering and caching of the pre-filtered XMLs
+https://plugins-server.cfapps.io/plugins.xml
 
 
 ## Configuration
@@ -45,12 +41,11 @@ Admin application:
 * PASSWORD: authentication for the admin panel
 
 
-
 ## Testing
 
-Plugin server has some API tests.
+Plugin server has a comprehensive API test coverage.
 
-TODO: web tests.
+TODO: test for the web GUI.
 
 ### Running the tests
 
@@ -58,6 +53,16 @@ TODO: web tests.
 cd plugins_admin
 nosetests -s
 ```
+
+## REST API
+
+A REST API is available in the admin application:
+
+**key** is composed by `Plugin:<plugin_name>:<plugin_version>`
+
++ `/rest/metadata/<string:key>/<string:metadata_key>` GET or POST a metadata
++ `/rest/package/<string:key>` GET or POST a plugins zip file
++ `/rest/plugins` GET all plugins as a keys and metadata hash
 
 
 ## Running locally
@@ -71,4 +76,14 @@ FLASK_DEBUG=1 python main.py
 ```
 cd plugins_server
 FLASK_DEBUG=1 python main.py
+```
+
+
+# Deploying on PCF
+
+There is a `deploy.sh` script that accepts two optional parameters for
+username and password:
+
+```
+./deploy.sh user secret
 ```

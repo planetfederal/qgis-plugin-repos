@@ -15,10 +15,10 @@
     <tbody>
   {% for plugin in plugins -%}
     <tr>
-      <td><a href="{{ url_for('plugin_details', key=plugin.get_key())}}">{{ plugin.name }}</a></td>
+      <td><a href="{{ url_for('plugin_details', key=plugin.key)}}">{{ plugin.name }}</a></td>
       <td>{{ plugin.version }}</td>
-      <td><a href="{{ url_for('plugin_delete', key=plugin.get_key()) }}" class="btn btn-default">Delete</a></td>
-      <td><a href="{{ url_for('plugin_download', key=plugin.get_key()) }}" class="btn btn-default">Download</a></td>
+      <td><a href="{{ url_for('plugin_delete', key=plugin.key) }}" class="btn btn-default">Delete</a></td>
+      <td><a href="{{ url_for('plugin_download', key=plugin.key) }}" class="btn btn-default">Download</a></td>
     </tr>
   {%- endfor %}
     </tbody>

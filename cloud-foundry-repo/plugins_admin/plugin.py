@@ -9,16 +9,14 @@ Author: Alessandro Pasotti
 
 """
 from flask import Flask
-import collections
 import ConfigParser
 import codecs
-import os
-import redis
-import json
 import zipfile
 from connection import db
 from plugin_exceptions import *
+from version_compare import isCompatible
 from cStringIO import StringIO
+from validator import validator
 
 # Derived metadata, not to be stored in the zipfile metadata.txt
 EXCLUDE_METADATA=('metadata_source', 'icon_content')
@@ -38,7 +36,6 @@ class Plugin:
     @classmethod
     def create_from_zip(cls, zip_file):
         """Create a Plugin instance from a zipfile file object"""
-        from validator import validator
         metadata = dict(validator(zip_file))
         # Parse metadata
         key = cls.make_key(metadata['name'], metadata['version'])
@@ -50,11 +47,18 @@ class Plugin:
         return Plugin(key)
 
     @classmethod
-    def all(cls, orderby='title'):
+    def all(cls, orderby='title', version=None):
         plugins = []
         for key in db.scan_iter():
             if key.startswith('Plugin:'):
-                plugins.append(Plugin(key))
+                plugin = Plugin(key)
+                if (version is None
+                    or isCompatible(version,
+                                    plugin.qgisMinimumVersion,
+                                    plugin.qgisMaximumVersion if
+                                    plugin.qgisMaximumVersion else
+                                    plugin.qgisMinimumVersion.split('.')[0]+'.99')):
+                    plugins.append(plugin)
         return sorted(plugins, key=lambda p: getattr(p, orderby))
 
     def __init__(self, key):
@@ -69,7 +73,8 @@ class Plugin:
     def __nonzero__(self):
         return self is not None
 
-    def get_key(self):
+    @property
+    def key(self):
         return self.make_key(self.metadata['name'], self.metadata['version'])
 
     @property
@@ -77,12 +82,12 @@ class Plugin:
         return "{} - ver. {}".format(self.name, self.version)
 
     def incr_downloads(self):
-        db.hincrby(self.get_key(), 'downloads', 1)
+        db.hincrby(self.key, 'downloads', 1)
 
     def write(self):
         """Write to db"""
-        db.hmset(self.get_key(), self.metadata)
-        db.hset(self.get_key(), 'blob', self.blob)
+        db.hmset(self.key, self.metadata)
+        db.hset(self.key, 'blob', self.blob)
 
 
     def read(self, key):
@@ -115,14 +120,13 @@ class Plugin:
         self.blob = outf.getvalue()
         self.write()
 
-
     def set_metadata(self, k, v):
         """Set a metadata value and calls write to save into the DB"""
-        old_key = self.get_key()
+        old_key = self.key
         self.metadata[k] = v
         # Set blob
         if k not in EXCLUDE_METADATA:
             self.update_blob(k, v)
         self.write()
-        if old_key != self.get_key():
+        if old_key != self.key:
             self.delete(old_key)
