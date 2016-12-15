@@ -1,15 +1,12 @@
-# Cloud-Foundry QGIS Plugins Experimental Repository
+# Cloud-Foundry QGIS Plugins Repository
 
-This is an experimental repository that works on Cloud-Foundry, with the
+This is a QGIS Plugin repository that works on Cloud-Foundry, with the
 following stack:
 
 * redis
 * Python Flask
 
 There are two different applications: admin panel and server.
-
-FIXME: there is some code duplication in the two directories, unfortunately
-CF do not support symlinks.
 
 
 ## Plugin admin panel
