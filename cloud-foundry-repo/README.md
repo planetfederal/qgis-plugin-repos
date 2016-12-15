@@ -61,7 +61,7 @@ A REST API is available in the admin application:
 **key** is composed by `Plugin:<plugin_name>:<plugin_version>`
 
 + `/rest/metadata/<string:key>/<string:metadata_key>` GET or POST a metadata
-+ `/rest/package/<string:key>` GET or POST a plugins zip file
++ `/rest/package/<string:key>` GET or POST a plugins zip file, or DELETE a plugin
 + `/rest/plugins` GET all plugins as a keys and metadata hash
 
 

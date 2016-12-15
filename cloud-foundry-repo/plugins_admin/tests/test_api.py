@@ -107,6 +107,16 @@ class APITestCase(unittest.TestCase):
             for k, v in p.metadata.items():
                 self.assertEqual(getattr(p, k), v)
 
+    def test_api_delete_package(self):
+        plugin = self.load_from_zip()
+        # Delete it
+        response = self.open_with_auth('/rest/package/%s' % plugin.key, method='DELETE')
+        self.assertEqual(json.loads(response.data)['result'], 'success')
+        # Check if it's been deleted for real
+        def load_deleted():
+            Plugin(plugin.key)
+        self.assertRaises(DoesNotExist, load_deleted)
+
 
 
 if __name__ == '__main__':

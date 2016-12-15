@@ -206,6 +206,15 @@ class PluginPackage(Resource):
     def post(self):
         return {'result': 'success'}
 
+    @requires_auth
+    def delete(self, key):
+        try:
+            plugin = Plugin(key)
+        except DoesNotExist:
+            abort(404)
+        plugin.delete(plugin.key)
+        return {'result': 'success'}
+
 api.add_resource(PluginPackage, '/rest/package/<string:key>')
 
 class PluginList(Resource):
