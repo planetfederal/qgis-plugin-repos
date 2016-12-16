@@ -12,7 +12,7 @@ import os
 import re
 import base64
 from functools import wraps
-from flask import Flask, request, make_response, Response, abort
+from flask import Flask, request, make_response, Response, abort, request
 from flask import render_template
 from flask_bootstrap import Bootstrap
 from plugin import Plugin
@@ -152,7 +152,12 @@ def plugin_upload():
 @requires_auth
 def plugins_xml():
     """Create the XML file"""
-    plugins = Plugin.all()
+    version = None
+    try:
+        version = request.args.get('qgis')
+    except KeyError:
+        pass
+    plugins = Plugin.all(version=version)
     response = make_response(render_template('plugins.xml', plugins=plugins))
     response.headers['Content-Type'] = 'application/xml'
     response.headers['Content-Disposition'] = 'inline; plugins.xml'
@@ -164,10 +169,10 @@ def plugins_xsl():
     """Create the XML file"""
     return app.send_static_file('plugins.xsl')
 
+
 ################################################################################
 # REST API
 #
-
 
 class PluginMetadata(Resource):
     @requires_auth

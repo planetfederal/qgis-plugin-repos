@@ -11,44 +11,16 @@ Author: Alessandro Pasotti
 import os
 import unittest
 import base64
-from flask import json, jsonify
+from flask import json
 from plugins_admin.plugin import Plugin
-from plugins_admin import main
 from plugins_admin.plugin_exceptions import *
 from cStringIO import StringIO
 from plugins_admin.validator import validator
+from .utils import BaseTest, DATA_DIR
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
-USERNAME = os.getenv("USERNAME", 'admin')
-PASSWORD = os.getenv("PASSWORD", 'password')
+class APITestCase(BaseTest):
 
-class APITestCase(unittest.TestCase):
-
-    def setUp(self):
-        main.app.config['TESTING'] = True
-        self.app = main.app.test_client()
-
-    def tearDown(self):
-        for p in Plugin.all():
-            p.delete(p.key)
-
-    def open_with_auth(self, url, method, data=None):
-        return self.app.open(url,
-            method=method,
-            headers={
-                'Authorization': 'Basic ' + base64.b64encode(USERNAME + \
-                ":" + PASSWORD)
-            },
-            data=data
-        )
-
-    def load_from_zip(self, version=1):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_%s.zip'  % version)
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
-        self.assertIsNotNone(Plugin(plugin.key))
-        return plugin
 
     def test_api_get_metadata(self):
         plugin = self.load_from_zip()
@@ -75,7 +47,6 @@ class APITestCase(unittest.TestCase):
         self.assertNotEqual(package, open(os.path.join(DATA_DIR, 'test_plugin_1.zip')).read())
         metadata = dict(validator(StringIO(package)))
         self.assertEqual(metadata['xyz'], 'zyx')
-
 
     def test_api_get_package(self):
         plugin = self.load_from_zip()

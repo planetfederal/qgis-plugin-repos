@@ -9,30 +9,15 @@ Author: Alessandro Pasotti
 
 """
 import os
-import sys
 import unittest
 from cStringIO import StringIO
 from plugins_admin.plugin import Plugin
 from plugins_admin.plugin_exceptions import *
 from plugins_admin.validator import validator
+from .utils import BaseTest, DATA_DIR
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+class PluginTestCase(BaseTest):
 
-class PluginTestCase(unittest.TestCase):
-
-    def setUp(self):
-        for p in Plugin.all():
-            p.delete(p.key)
-
-    def tearDown(self):
-        pass
-
-    def load_from_zip(self, version=1):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_%s.zip'  % version)
-        zip_file = open(plugin_path, 'rb')
-        plugin = Plugin.create_from_zip(zip_file)
-        self.assertIsNotNone(Plugin(plugin.key))
-        return plugin
 
     def test_make_key(self):
         self.assertEqual(Plugin.make_key('uno', 'due'), 'Plugin:uno:due')
@@ -140,14 +125,12 @@ class PluginTestCase(unittest.TestCase):
         test_plugin_5/metadata.txt:version=0.1
 
         """
-
         for i in range(1, 6):
             self.load_from_zip(i)
 
         def _check_key(i, version):
             key = Plugin.make_key('Test Plugin %s' % i, '0.1' )
             return key in [p.key for p in Plugin.all(version=version)]
-
 
         self.assertTrue(_check_key(1, '2.0'))
         self.assertTrue(_check_key(1, '2.99'))

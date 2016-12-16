@@ -9,7 +9,7 @@ Author: Alessandro Pasotti
 """
 import os
 import re
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 from flask import render_template
 from plugin import Plugin
 from plugin_exceptions import DoesNotExist
@@ -20,12 +20,16 @@ port = int(os.getenv("PORT", 9099))
 
 app = Flask(__name__)
 
-
 @app.route('/')
 @app.route('/plugins.xml')
 def plugins_xml():
     """Create the XML file"""
-    plugins = Plugin.all()
+    version = None
+    try:
+        version = request.args.get('qgis')
+    except KeyError:
+        pass
+    plugins = Plugin.all(version=version)
     response = make_response(render_template('plugins.xml', plugins=plugins))
     response.headers['Content-Type'] = 'application/xml'
     response.headers['Content-Disposition'] = 'inline; plugins.xml'
