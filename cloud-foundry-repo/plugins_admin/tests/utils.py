@@ -31,7 +31,7 @@ class BaseTest(unittest.TestCase):
             p.delete(p.key)
 
     def load_from_zip(self, version=1):
-        plugin_path = os.path.join(DATA_DIR, 'test_plugin_%s.zip'  % version)
+        plugin_path = os.path.join(DATA_DIR, 'test_plugin_%s.zip' % version)
         zip_file = open(plugin_path, 'rb')
         plugin = Plugin.create_from_zip(zip_file)
         self.assertIsNotNone(Plugin(plugin.key))

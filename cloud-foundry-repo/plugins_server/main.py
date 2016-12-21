@@ -20,6 +20,7 @@ port = int(os.getenv("PORT", 9099))
 
 app = Flask(__name__)
 
+
 @app.route('/')
 @app.route('/plugins.xml')
 def plugins_xml():
@@ -36,15 +37,15 @@ def plugins_xml():
     return response
 
 
-@app.route('/download/<key>')
-def plugin_download(key):
+@app.route('/download/<key>/<package_name>.zip')
+def plugin_download(key, package_name):
     try:
         plugin = Plugin(key)
         plugin.incr_downloads()
         response = make_response(plugin.blob)
         response.headers['Content-Type'] = 'application/zip'
         response.headers['Content-Disposition'] = \
-            'inline; filename=%s.zip' % re.sub("[^A-z0-9]", '_', plugin.key)
+            'inline; filename=%s.zip' % package_name
         return response
     except DoesNotExist:
         return render_error('<b>{}</b> does not exists'.format(key))

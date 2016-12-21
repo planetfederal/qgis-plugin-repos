@@ -11,7 +11,7 @@
         <homepage>{{ plugin.homepage }}</homepage>
         <icon>{{ plugin.icon }}</icon>
         <author_name><![CDATA[{{ plugin.author}}]]></author_name>
-        <download_url>{{ url_for('plugin_download', key=plugin.key) }}</download_url>
+        <download_url>{{ url_for('plugin_download', key=plugin.key, package_name=plugin.package_name, _external=True) }}</download_url>
         <uploaded_by><![CDATA[Boundless]]></uploaded_by>
         <experimental>{{ plugin.experimental }}</experimental>
         <deprecated>{{ plugin.deprecated }}</deprecated>

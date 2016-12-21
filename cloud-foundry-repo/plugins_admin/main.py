@@ -108,16 +108,16 @@ def plugin_delete(key):
                            message=message)
 
 
-@app.route('/download/<key>')
+@app.route('/download/<key>/<package_name>.zip')
 @requires_auth
-def plugin_download(key):
+def plugin_download(key, package_name):
     try:
         plugin = Plugin(key)
         plugin.incr_downloads()
         response = make_response(plugin.blob)
         response.headers['Content-Type'] = 'application/zip'
         response.headers['Content-Disposition'] = \
-            'inline; filename=%s.zip' % re.sub("[^A-z0-9]", '_', plugin.key)
+            'inline; filename=%s.zip' % package_name
         return response
     except DoesNotExist:
         return render_error('<b>{}</b> does not exists'.format(key))
@@ -141,7 +141,7 @@ def plugin_upload():
                     file.filename.rsplit('.', 1)[1] == 'zip':
                 file.filename = secure_filename(file.filename)
                 # Create plugin
-                plugin = Plugin.create_from_zip(file)
+                plugin = Plugin.create_from_zip(file, file.filename)
                 message = 'Plugin {} version {} created'.format(plugin.name, plugin.version)
             else:
                 message = 'File does not have a zip extension'

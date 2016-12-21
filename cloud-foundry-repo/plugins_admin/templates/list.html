@@ -18,7 +18,7 @@
       <td><a href="{{ url_for('plugin_details', key=plugin.key)}}">{{ plugin.name }}</a></td>
       <td>{{ plugin.version }}</td>
       <td width="10%"><a href="{{ url_for('plugin_delete', key=plugin.key) }}" class="btn btn-default">Delete</a></td>
-      <td width="10%"><a href="{{ url_for('plugin_download', key=plugin.key) }}" class="btn btn-default">Download</a></td>
+      <td width="10%"><a href="{{ url_for('plugin_download', key=plugin.key, package_name=plugin.package_name, _external=True) }}" class="btn btn-default">Download</a></td>
     </tr>
   {%- endfor %}
     </tbody>
