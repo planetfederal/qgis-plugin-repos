@@ -8,6 +8,9 @@ following stack:
 
 There are two different applications: admin panel and server.
 
+## Prerequisites
+
+A redis cloud service instance from the Pivotal Web Services marketplace named `myredis` (or set a different name in the  `manifest.yml` file)
 
 ## Plugin admin panel
 
