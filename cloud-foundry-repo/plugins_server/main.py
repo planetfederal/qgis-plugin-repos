@@ -21,6 +21,10 @@ port = int(os.getenv("PORT", 9099))
 app = Flask(__name__)
 
 
+def render_error(error):
+    return render_template('error.html', error=error)
+
+
 @app.route('/')
 @app.route('/plugins.xml')
 def plugins_xml():
