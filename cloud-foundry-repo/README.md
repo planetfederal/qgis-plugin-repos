@@ -6,7 +6,20 @@ following stack:
 * redis
 * Python Flask
 
-There are two different applications: admin panel and server.
+There are two different applications: _admin panel_ and _plugin server_.
+
+## Plugin server
+
+Provides an XML listing of the available plugins and a way to download
+them. The plugin server is read-only and does not provide any way to
+update the available plugins.
+
+## Admin panel
+
+Provides a web GUI and a REST API for uploading, deleting and updating
+the plugin repository. This application does not need to be alway on
+and the server application is all yo need to serve and deliver the plugins
+to the users.
 
 ## Prerequisites
 
@@ -32,6 +45,10 @@ All configuration is done through environment variables.
 
 All applications:
 * PORT: the port for the development server when running locally
+* SYSLOG_HOST: _optional_ host for the syslog logging, default to `None` (logging disabled, set to the IP address of the syslog server to activate logging)
+* SYSLOG_PORT: _optional_ port for the syslog logging, default to 514
+* SYSLOG_FACILITY:  _optional_ facility integer code for the syslog logging, default to 1 (`SysLogHandler.LOG_USER`)
+* SYSLOG_FORMATTER: _optional_ formatting string in Python logging syntax, default to `[%(asctime)s] %(levelname)s %(process)d [%(name)s] - %(message)s`
 
 `settings.py` contains some global metadata settings for the validator, that
 usually do not need to be changed.
@@ -81,9 +98,12 @@ FLASK_DEBUG=1 python main.py
 
 # Deploying on PCF
 
-There is a `deploy.sh` script that accepts two optional parameters for
-username and password:
+A convenience deploy `deploy.sh` script that accepts two optional parameters for
+username and password is provided:
 
 ```
 ./deploy.sh user secret
 ```
+
+To get full control over the applications configuration (e.g. to congigure
+syslog logging) you can directly edit the `manifest.yml` file.

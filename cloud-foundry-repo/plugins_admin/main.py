@@ -19,20 +19,52 @@ from plugin import Plugin
 from plugin_exceptions import DoesNotExist
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, Api
+import logging
+from logging.handlers import SysLogHandler
+
 
 # Get port from environment variable or choose 9099 as local default
 port = int(os.getenv("PORT", 9099))
+# Syslog
+syslog_port = int(os.getenv("SYSLOG_PORT", 514))
+syslog_host = os.getenv("SYSLOG_HOST")
+syslog_facility = int(os.getenv("SYSLOG_FACILITY", SysLogHandler.LOG_USER))
+syslog_formatter = os.getenv('SYSLOG_FORMATTER', '[%(asctime)s] %(levelname)s %(process)d [%(name)s] - %(message)s')
 
 app = Flask(__name__)
 Bootstrap(app)
 api = Api(app)
+
+if syslog_host is not None:
+    logger = logging.getLogger("QGIS Plugin Repository Admin Panel")
+    formatter = syslog_formatter
+    logger.setLevel(logging.INFO)
+    handler = SysLogHandler(address=(syslog_host, syslog_port),
+                            facility=syslog_facility)
+    handler.setFormatter(logging.Formatter(syslog_formatter))
+    logger.addHandler(handler)
+    logger.info("Initialised")
+else:
+    logger = None
+
+
+def log(msg, level=logging.INFO):
+    """Send a message to the logs"""
+    if syslog_host is not None:
+        logger.log(level, msg)
 
 
 def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username == os.getenv("USERNAME", 'admin') and password == os.getenv("PASSWORD", 'password')
+    is_valid = username == os.getenv("USERNAME", 'admin') and password == os.getenv("PASSWORD", 'password')
+    if is_valid:
+        log("User %s authenticated successfully" % username)
+    else:
+        log("Access denied for user %s" % username)
+    return is_valid
+
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
@@ -52,6 +84,7 @@ def requires_auth(f):
 
 
 def render_error(error):
+    log("View error: %s" % error)
     return render_template('error.html', error=error)
 
 @app.route('/')
@@ -61,6 +94,7 @@ def plugins_list():
     plugins = Plugin.all()
     if not len(plugins):
         message = 'There are no plugins.'
+    log("Plugins listed")
     return render_template('list.html',
                            title='Plugin list',
                            plugins=plugins,
@@ -75,6 +109,7 @@ def plugin_details(key):
         plugin = Plugin(key)
     except DoesNotExist:
         return render_error('<b>{}</b> does not exists'.format(key))
+    log("Plugin details for %s" % key)
     return render_template('details.html',
                            title="{} - ver. {}".format(plugin.name, plugin.version),
                            plugin=plugin,
@@ -91,6 +126,7 @@ def plugin_delete(key):
             plugin = Plugin(key)
             title = 'Plugin {} version {} deleted'.format(plugin.name, plugin.version)
             plugin.delete(key)
+            log("Plugin %s has been deleted" % key)
         except DoesNotExist:
             return render_error('<b>{}</b> does not exists'.format(key))
     else:
@@ -98,6 +134,7 @@ def plugin_delete(key):
             plugin = Plugin(key)
             title = 'Confirm deletion of Plugin {} version {}?'.format(plugin.name, plugin.version)
             show_form = True
+            log("Plugin %s deletion confirmation asked" % key)
         except DoesNotExist:
             return render_error('{} does not exists'.format(key))
 
@@ -118,6 +155,7 @@ def plugin_download(key, package_name):
         response.headers['Content-Type'] = 'application/zip'
         response.headers['Content-Disposition'] = \
             'inline; filename=%s.zip' % package_name
+        log("Plugin %s downloaded" % key)
         return response
     except DoesNotExist:
         return render_error('<b>{}</b> does not exists'.format(key))
@@ -145,6 +183,7 @@ def plugin_upload():
                 message = 'Plugin {} version {} created'.format(plugin.name, plugin.version)
             else:
                 message = 'File does not have a zip extension'
+    log("Plugin upload message: %s" % message)
     return render_template('upload.html', message=message)
 
 
