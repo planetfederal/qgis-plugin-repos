@@ -89,6 +89,15 @@ def plugins_xsl():
     return app.send_static_file('plugins.xsl')
 
 
+def app_bootstrap():
+    """Load all zipfile plugins from the plugins folder"""
+    zipfolder = os.path.join(os.path.dirname(__file__), 'zipfiles')
+    if os.path.isdir(zipfolder):
+        for path in [p for p in os.listdir() if p.endswith('.zip')]:
+            log(msg)
+
+
 if __name__ == '__main__':
     # Run the app, listening on all IPs with our chosen port number
+    app_bootstrap()
     app.run(host='0.0.0.0', port=port)

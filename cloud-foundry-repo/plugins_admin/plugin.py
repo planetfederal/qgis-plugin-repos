@@ -35,7 +35,8 @@ class Plugin:
 
     @classmethod
     def create_from_zip(cls, zip_file):
-        """Create a Plugin instance from a zipfile file object"""
+        """Create a Plugin instance from a zipfile file object,
+        can raise ValidationError"""
         metadata = dict(validator(zip_file))
         # Parse metadata
         key = cls.make_key(metadata['name'], metadata['version'])

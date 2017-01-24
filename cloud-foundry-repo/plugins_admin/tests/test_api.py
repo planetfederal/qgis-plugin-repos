@@ -21,7 +21,6 @@ from .utils import BaseTest, DATA_DIR
 
 class APITestCase(BaseTest):
 
-
     def test_api_get_metadata(self):
         plugin = self.load_from_zip()
         response = self.open_with_auth('/rest/metadata/%s/%s' % (plugin.key, 'version'), method='GET')
@@ -55,22 +54,32 @@ class APITestCase(BaseTest):
         self.assertEqual(package, open(os.path.join(DATA_DIR, 'test_plugin_1.zip')).read())
 
     def test_api_post_package(self):
-        plugin = self.load_from_zip()
-        response = self.open_with_auth('/rest/package/%s' % plugin.key, method='GET')
+        data = open(os.path.join(DATA_DIR, 'test_plugin_1.zip')).read()
+        response = self.open_with_auth('/rest/package/', method='POST', data=data)
+        response_data = json.loads(response.data)
+        self.assertEqual(response_data['result'], 'success')
+        self.assertEqual(response_data['plugin']['name'], u'Test Plugin 1')
+        key = Plugin.make_key(response_data['plugin']['name'], response_data['plugin']['version'])
+
+        # Loopback
+        response = self.open_with_auth('/rest/package/%s' % key, method='GET')
         package = base64.decodestring(json.loads(response.data).values()[0])
         self.assertEqual(package, open(os.path.join(DATA_DIR, 'test_plugin_1.zip')).read())
         # Get the package and check the zip file
-        response = self.open_with_auth('/rest/package/%s' % plugin.key, method='GET')
-        package = base64.decodestring(json.loads(response.data).values()[0])
-        self.assertEqual(package, open(os.path.join(DATA_DIR, 'test_plugin_1.zip')).read())
         metadata = dict(validator(StringIO(package)))
-        self.assertEqual(metadata['name'], plugin.name)
-        self.assertEqual(metadata['version'], plugin.version)
-        self.assertEqual(metadata['author'], plugin.author)
+        self.assertEqual(metadata['name'], response_data['plugin']['name'])
+        self.assertEqual(metadata['version'], response_data['plugin']['version'])
+        self.assertEqual(metadata['author'], response_data['plugin']['author'])
+
+    def test_api_post_invalid_package(self):
+        data = open(os.path.join(DATA_DIR, 'test_plugin_invalid.zip')).read()
+        response = self.open_with_auth('/rest/package/', method='POST', data=data)
+        response_data = json.loads(response.data)
+        self.assertEqual(response_data['result'], 'error')
 
     def test_plugins_list(self):
-        plugin = self.load_from_zip()
-        plugin = self.load_from_zip(2)
+        self.load_from_zip()
+        self.load_from_zip(2)
         response = self.open_with_auth('/rest/plugins', method='GET')
         plugins = dict(json.loads(response.data)['plugins'].items())
         for p in Plugin.all():

@@ -11,11 +11,12 @@ Author: Alessandro Pasotti
 import os
 import base64
 from functools import wraps
+from cStringIO import StringIO
 from flask import Flask, request, make_response, Response, abort, request
 from flask import render_template
 from flask_bootstrap import Bootstrap
 from plugin import Plugin
-from plugin_exceptions import DoesNotExist
+from plugin_exceptions import DoesNotExist, ValidationError
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, Api
 import logging
@@ -180,8 +181,11 @@ def plugin_upload():
                     file.filename.rsplit('.', 1)[1] == 'zip':
                 file.filename = secure_filename(file.filename)
                 # Create plugin
-                plugin = Plugin.create_from_zip(file, file.filename)
-                message = 'Plugin {} version {} created'.format(plugin.name, plugin.version)
+                try:
+                    plugin = Plugin.create_from_zip(file, file.filename)
+                    message = 'Plugin {} version {} created'.format(plugin.name, plugin.version)
+                except ValidationError as e:
+                    render_error('<b>{}</b> is not valid {}'.format(key, e))
             else:
                 message = 'File does not have a zip extension'
     log("Plugin upload message: %s" % message)
@@ -238,6 +242,7 @@ class PluginMetadata(Resource):
 
 api.add_resource(PluginMetadata, '/rest/metadata/<string:key>/<string:metadata_key>')
 
+
 class PluginPackage(Resource):
     @requires_auth
     def get(self, key):
@@ -249,7 +254,12 @@ class PluginPackage(Resource):
 
     @requires_auth
     def post(self):
-        return {'result': 'success'}
+        data = StringIO(request.data)
+        try:
+            plugin = Plugin.create_from_zip(data)
+        except ValidationError as e:
+            return {'result': 'error', 'message': "%s" % e}
+        return {'result': 'success', 'plugin': plugin.metadata}
 
     @requires_auth
     def delete(self, key):
@@ -260,7 +270,8 @@ class PluginPackage(Resource):
         plugin.delete(plugin.key)
         return {'result': 'success'}
 
-api.add_resource(PluginPackage, '/rest/package/<string:key>')
+api.add_resource(PluginPackage, '/rest/package/<string:key>', '/rest/package/', '/rest/package')
+
 
 class PluginList(Resource):
     @requires_auth
@@ -268,7 +279,6 @@ class PluginList(Resource):
         return {'plugins': {p.key: p.metadata for p in Plugin.all()}}
 
 api.add_resource(PluginList, '/rest/plugins')
-
 
 
 if __name__ == '__main__':

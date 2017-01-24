@@ -9,7 +9,6 @@ Author: Alessandro Pasotti
 
 """
 import os
-import sys
 import unittest
 from cStringIO import StringIO
 from plugins_admin.plugin import Plugin
@@ -77,6 +76,16 @@ class PluginTestCase(unittest.TestCase):
         def load_deleted():
             Plugin(key)
         self.assertRaises(DoesNotExist, load_deleted)
+
+    def test_load_from_invalidzip(self):
+        """
+        Create a Plugin from an invalid zip file
+        """
+        # Make plugin
+        def load_invalid():
+            plugin = self.load_from_zip('invalid')
+        self.assertRaises(ValidationError, load_invalid)
+
 
     def test_set_metadata(self):
         plugin = self.load_from_zip()
