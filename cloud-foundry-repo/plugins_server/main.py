@@ -11,7 +11,7 @@ import os
 from flask import Flask, make_response, request
 from flask import render_template
 from plugin import Plugin
-from plugin_exceptions import DoesNotExist
+from plugin_exceptions import DoesNotExist, ValidationError
 import logging
 from logging.handlers import SysLogHandler
 
@@ -90,11 +90,17 @@ def plugins_xsl():
 
 
 def app_bootstrap():
-    """Load all zipfile plugins from the plugins folder"""
+    """Load all zipfile plugins from the zipfiles folder"""
     zipfolder = os.path.join(os.path.dirname(__file__), 'zipfiles')
     if os.path.isdir(zipfolder):
-        for path in [p for p in os.listdir() if p.endswith('.zip')]:
-            log(msg)
+        for path in [f for f in os.listdir(zipfolder)
+                     if (os.path.isfile(os.path.join(zipfolder, f))
+                     and f.endswith('.zip'))]:
+            try:
+                plugin = Plugin.create_from_zip(open(os.path.join(zipfolder, path)))
+                log("Plugin: %s has been succesfully loaded" % plugin.key)
+            except ValidationError as e:
+                log("Plugin file: %s could not be loaded: %s" % (path, e))
 
 
 if __name__ == '__main__':

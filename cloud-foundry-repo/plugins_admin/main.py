@@ -281,6 +281,21 @@ class PluginList(Resource):
 api.add_resource(PluginList, '/rest/plugins')
 
 
+def app_bootstrap():
+    """Load all zipfile plugins from the zipfiles folder"""
+    zipfolder = os.path.join(os.path.dirname(__file__), 'zipfiles')
+    if os.path.isdir(zipfolder):
+        for path in [f for f in os.listdir(zipfolder)
+                     if (os.path.isfile(os.path.join(zipfolder, f))
+                     and f.endswith('.zip'))]:
+            try:
+                plugin = Plugin.create_from_zip(open(os.path.join(zipfolder, path)))
+                log("Plugin: %s has been succesfully loaded" % plugin.key)
+            except ValidationError as e:
+                log("Plugin file: %s could not be loaded: %s" % (path, e))
+
+
 if __name__ == '__main__':
     # Run the app, listening on all IPs with our chosen port number
+    app_bootstrap()
     app.run(host='0.0.0.0', port=port)

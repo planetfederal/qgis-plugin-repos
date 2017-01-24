@@ -58,6 +58,15 @@ Admin application:
 * PASSWORD: authentication for the admin panel
 
 
+## Mass-loading of plugins
+
+All zipfiles contained in the `zipfiles` folder will be automatically loaded
+whenever a new instance of the application (server or admin) is deployed.
+
+If a plugin with the same name and version already existed in the DB it will
+be silently overwritten.
+
+
 ## Testing
 
 Plugin server has a comprehensive API test coverage.
