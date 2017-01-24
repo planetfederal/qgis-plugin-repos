@@ -8,7 +8,6 @@ Serve plugins.xml
 Author: Alessandro Pasotti
 """
 import os
-import re
 from flask import Flask, make_response, request
 from flask import render_template
 from plugin import Plugin

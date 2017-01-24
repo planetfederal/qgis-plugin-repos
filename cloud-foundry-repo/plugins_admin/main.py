@@ -9,7 +9,6 @@ Author: Alessandro Pasotti
 
 """
 import os
-import re
 import base64
 from functools import wraps
 from flask import Flask, request, make_response, Response, abort, request
