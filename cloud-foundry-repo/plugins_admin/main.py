@@ -72,6 +72,7 @@ def authenticate():
     'You have to login with proper credentials', 401,
     {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
+
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -85,6 +86,7 @@ def requires_auth(f):
 def render_error(error):
     log("View error: %s" % error)
     return render_template('error.html', error=error)
+
 
 @app.route('/')
 @requires_auth
