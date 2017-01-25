@@ -1,4 +1,4 @@
-# QGIS Plugin Repository on Cloud Foundry Staticfile
+# Cloud-Foundry Staticfile QGIS Plugin Repository 
 
 This repository is completely static (no server-side code) and relies upon
 the standard PCF Staticfile buildpack.
