@@ -1,0 +1,10 @@
+---
+
+domain: cfapps.io
+
+applications:
+- name: cloud-foundry-static-repo
+  memory: 64MB
+  disk_quota: 63MB
+  buildpack: staticfile_buildpack
+  path: plugins

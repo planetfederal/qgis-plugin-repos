@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<plugins>
+
+<pyqgis_plugin name="Test Plugin 3" version="0.1">
+    <description><![CDATA[This is my third awesome plugin for testing.]]></description>
+    <about><![CDATA[Here is some interesting text about my third test plugin.]]></about>
+    <version>0.1</version>
+    <qgis_minimum_version>2.0</qgis_minimum_version>
+    <qgis_maximum_version></qgis_maximum_version>
+    <homepage>http://boundlessgeo.com</homepage>
+    <file_name>test_plugin_3.zip</file_name>
+    <icon>icons/opengeo/0.8.0-201609211649-1d16dfb.png</icon>
+    <author_name><![CDATA[Larry Shaffer (Boundless)]]></author_name>
+    <download_url>htts://cloud-foundry-static-repo.cfapps.io/test_plugin_3.zip</download_url>
+    <experimental>False</experimental>
+    <deprecated>False</deprecated>
+    <tracker><![CDATA[https://github.com/boundlessgeo/QGIS/issues]]></tracker>
+    <repository><![CDATA[https://github.com/boundlessgeo/QGIS]]></repository>
+    <changelog><![CDATA[
+** General **
+0.1:
+-First version]]></changelog>
+    <tags>boundless,test</tags>
+  </pyqgis_plugin>
+
+<pyqgis_plugin name="Test Plugin 5" version="0.1">
+    <description><![CDATA[This is my first awesome plugin for testing.]]></description>
+    <about><![CDATA[Here is some interesting text about my first test plugin.]]></about>
+    <version>0.1</version>
+    <qgis_minimum_version>2.1</qgis_minimum_version>
+    <qgis_maximum_version>2.3</qgis_maximum_version>
+    <homepage>http://boundlessgeo.com</homepage>
+    <file_name>test_plugin_5.zip</file_name>
+    <icon>icons/opengeo/0.8.0-201609211649-1d16dfb.png</icon>
+    <author_name><![CDATA[Larry Shaffer (Boundless)]]></author_name>
+    <download_url>htts://cloud-foundry-static-repo.cfapps.io/test_plugin_5.zip</download_url>
+    <experimental>False</experimental>
+    <deprecated>False</deprecated>
+    <tracker><![CDATA[https://github.com/boundlessgeo/QGIS/issues]]></tracker>
+    <repository><![CDATA[https://github.com/boundlessgeo/QGIS]]></repository>
+    <changelog><![CDATA[
+** General **
+0.5:
+-First version]]></changelog>
+    <tags>boundless,test</tags>
+  </pyqgis_plugin>
+
+<pyqgis_plugin name="Test Plugin 2" version="0.1">
+    <description><![CDATA[This is my second awesome plugin for testing.]]></description>
+    <about><![CDATA[Here is some interesting text about my second test plugin.]]></about>
+    <version>0.1</version>
+    <qgis_minimum_version>2.14</qgis_minimum_version>
+    <qgis_maximum_version></qgis_maximum_version>
+    <homepage>http://boundlessgeo.com</homepage>
+    <file_name>test_plugin_2.zip</file_name>
+    <icon>icons/opengeo/0.8.0-201609211649-1d16dfb.png</icon>
+    <author_name><![CDATA[Larry Shaffer (Boundless)]]></author_name>
+    <download_url>htts://cloud-foundry-static-repo.cfapps.io/test_plugin_2.zip</download_url>
+    <experimental>False</experimental>
+    <deprecated>False</deprecated>
+    <tracker><![CDATA[https://github.com/boundlessgeo/QGIS/issues]]></tracker>
+    <repository><![CDATA[https://github.com/boundlessgeo/QGIS]]></repository>
+    <changelog><![CDATA[
+** General **
+0.1:
+-First version]]></changelog>
+    <tags>boundless,test</tags>
+  </pyqgis_plugin>
+
+<pyqgis_plugin name="Test Plugin 4" version="0.1">
+    <description><![CDATA[This is my fourth awesome plugin for testing.]]></description>
+    <about><![CDATA[Here is some interesting text about my third test plugin.]]></about>
+    <version>0.1</version>
+    <qgis_minimum_version>2.16</qgis_minimum_version>
+    <qgis_maximum_version></qgis_maximum_version>
+    <homepage>http://boundlessgeo.com</homepage>
+    <file_name>test_plugin_4.zip</file_name>
+    <icon>icons/opengeo/0.8.0-201609211649-1d16dfb.png</icon>
+    <author_name><![CDATA[Larry Shaffer (Boundless)]]></author_name>
+    <download_url>htts://cloud-foundry-static-repo.cfapps.io/test_plugin_4.zip</download_url>
+    <experimental>False</experimental>
+    <deprecated>False</deprecated>
+    <tracker><![CDATA[https://github.com/boundlessgeo/QGIS/issues]]></tracker>
+    <repository><![CDATA[https://github.com/boundlessgeo/QGIS]]></repository>
+    <changelog><![CDATA[
+** General **
+0.1:
+-First version]]></changelog>
+    <tags>boundless,test</tags>
+  </pyqgis_plugin>
+
+<pyqgis_plugin name="Test Plugin 1" version="0.1">
+    <description><![CDATA[This is my first awesome plugin for testing.]]></description>
+    <about><![CDATA[Here is some interesting text about my first test plugin.]]></about>
+    <version>0.1</version>
+    <qgis_minimum_version>2.0</qgis_minimum_version>
+    <qgis_maximum_version></qgis_maximum_version>
+    <homepage>http://boundlessgeo.com</homepage>
+    <file_name>test_plugin_1.zip</file_name>
+    <icon>icons/opengeo/0.8.0-201609211649-1d16dfb.png</icon>
+    <author_name><![CDATA[Larry Shaffer (Boundless)]]></author_name>
+    <download_url>htts://cloud-foundry-static-repo.cfapps.io/test_plugin_1.zip</download_url>
+    <experimental>False</experimental>
+    <deprecated>False</deprecated>
+    <tracker><![CDATA[https://github.com/boundlessgeo/QGIS/issues]]></tracker>
+    <repository><![CDATA[https://github.com/boundlessgeo/QGIS]]></repository>
+    <changelog><![CDATA[
+** General **
+0.1:
+-First version]]></changelog>
+    <tags>boundless,test</tags>
+  </pyqgis_plugin>
+
+</plugins>
