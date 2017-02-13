@@ -37,3 +37,13 @@ if [ ! -f $ARCHIVE_DIR/$QGIS_ARCHIVE ]; then
   echo -e "\n... backup failed"
   exit 1
 fi
+
+pushd  $ARCHIVE_DIR
+  echo -e "\nPruning any archives older than most recent 7"
+  ls -tp | grep -v '/$' | tail -n +8 | xargs -I {} rm -- {}
+popd
+
+if [ ! -f $ARCHIVE_DIR/$QGIS_ARCHIVE ]; then
+  echo -e "\n... backup failed (pruning may have deleted most recent backup)"
+  exit 1
+fi
