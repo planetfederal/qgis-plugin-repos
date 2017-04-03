@@ -92,7 +92,7 @@ the user's credentials to:
 
 The user roles response for a valid user looks like the following:
 ```
-﻿⁠⁠⁠⁠["Registered Users", "DesktopBasic"]
+﻿⁠⁠⁠⁠["Suite", "DesktopBasic"]
 ```
 
 
@@ -154,7 +154,7 @@ instructions about building the dockers and upload example plugins.
 ### Fully automated tests
 
 The directory `tests` contains a python test script that can be used
-to test the dockerized repository created with `test-build.run load`
+to test the dockerized repository created with `test-run.sh load`
 as explained in the [base manual][mdr].
 The list of Python requirements for the test script can be found in the file
 `resources/REQUIREMENTS.txt`.
