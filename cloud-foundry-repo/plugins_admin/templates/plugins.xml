@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="{{ url_for('plugins_xsl') }}" ?>
 <plugins>
     {% for plugin in plugins %}
-    <pyqgis_plugin name="{{ plugin.name}}" version="1.0">
+    <pyqgis_plugin name="{{ plugin.name}}" version="{{ plugin.version }}">
         <description><![CDATA[{{ plugin.description}}]]></description>
         <about><![CDATA[{{ plugin.about}}]]></about>
         <version>{{ plugin.version}}</version>
