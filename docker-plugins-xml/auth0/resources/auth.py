@@ -314,6 +314,7 @@ def user_profile():
     access_token = _request_ctx_stack.top.current_user_token
     message_log("Got access token for user profile")
     user_profile = get_user_profile(access_token)
+    user_profile['access_token'] = access_token
     return json.dumps(user_profile)
 
 
