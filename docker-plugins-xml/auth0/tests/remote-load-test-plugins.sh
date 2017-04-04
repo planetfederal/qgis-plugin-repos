@@ -24,6 +24,8 @@ do
   ssh ${SSH_HOST} "${UPDATER} update ${zp}"
   scp ${zp} ${SSH_HOST}:${UPLOADS}
   ssh ${SSH_HOST} "${UPDATER} update --dev ${zp}"
+  scp ${zp} ${SSH_HOST}:${UPLOADS}
+  ssh ${SSH_HOST} "${UPDATER} update --beta ${zp}"
 done
 
 # Auth required, no Role required
@@ -33,6 +35,8 @@ do
   ssh ${SSH_HOST} "${UPDATER} update --auth ${zp}"
   scp ${zp} ${SSH_HOST}:${UPLOADS}
   ssh ${SSH_HOST} "${UPDATER} update --dev --auth ${zp}"
+  scp ${zp} ${SSH_HOST}:${UPLOADS}
+  ssh ${SSH_HOST} "${UPDATER} update --beta --auth ${zp}"
 done
 
 # Role based authorization DesktopBasic and DesktopBasic
@@ -42,6 +46,8 @@ do
   ssh ${SSH_HOST} "${UPDATER} update --role 'Registered Users,DesktopEnterprise,DesktopBasic' ${zp}"
   scp ${zp} ${SSH_HOST}:${UPLOADS}
   ssh ${SSH_HOST} "${UPDATER} update --dev --role 'DesktopEnterprise,DesktopBasic' ${zp}"
+  scp ${zp} ${SSH_HOST}:${UPLOADS}
+  ssh ${SSH_HOST} "${UPDATER} update --beta --role 'DesktopEnterprise,DesktopBasic' ${zp}"
 done
 
 # Role based authorization DesktopEnterprise
@@ -51,4 +57,6 @@ do
   ssh ${SSH_HOST} "${UPDATER} update --role 'DesktopEnterprise' ${zp}"
   scp ${zp} ${SSH_HOST}:${UPLOADS}
   ssh ${SSH_HOST} "${UPDATER} update --dev --role 'DesktopEnterprise' ${zp}"
+  scp ${zp} ${SSH_HOST}:${UPLOADS}
+  ssh ${SSH_HOST} "${UPDATER} update --beta --role 'DesktopEnterprise' ${zp}"
 done

@@ -4,6 +4,7 @@ MAINTAINER Larry Shaffer<lshaffer@boundlessgeo.com>
 ARG SSH_USER=user
 ARG UPLOADED_BY=Boundless
 ARG DOMAIN_TLD=qgis.boundless.test
+ARG DOMAIN_TLD_BETA=qgis-beta.boundless.test
 ARG DOMAIN_TLD_DEV=qgis-dev.boundless.test
 
 ADD setup.sh /tmp/

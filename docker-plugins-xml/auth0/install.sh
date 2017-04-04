@@ -20,13 +20,15 @@ scp resources/REQUIREMENTS.txt ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 
 
 # Install all modifications and restart services
-# Note: there is no difference between auth and auth-dev in this setup!
+# Note: there is no difference between auth and auth-dev or auth-beta in this setup!
 LC_ALL="C" ssh -t ${SSH_CONFIG_NAME} "echo \"
 /opt/venv/bin/pip install -r /home/${SSH_USER}/REQUIREMENTS.txt
 mv /home/${SSH_USER}/auth /etc/nginx/incl.d/auth
 cp /etc/nginx/incl.d/auth /etc/nginx/incl.d/auth-dev
+cp /etc/nginx/incl.d/auth /etc/nginx/incl.d/auth-beta
 mv /home/${SSH_USER}/api /etc/nginx/incl.d/api
 cp /etc/nginx/incl.d/api /etc/nginx/incl.d/api-dev
+cp /etc/nginx/incl.d/api /etc/nginx/incl.d/api-beta
 chown ${SSH_USER}:users /var/www/auth.py
 mkdir /home/uwsgi
 mv /home/${SSH_USER}/.auth0.env /home/uwsgi

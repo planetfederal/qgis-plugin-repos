@@ -67,5 +67,7 @@ sed -i "s#SSL_KEY#${SSL_KEY}#g" ssl_cert
 
 cd $NGINX_CONF/conf.d
 
+# Order matters!!!!
 sed -i "s/domain-tld-dev/${DOMAIN_TLD_DEV}/g" qgis-repo.conf
+sed -i "s/domain-tld-beta/${DOMAIN_TLD_BETA}/g" qgis-repo.conf
 sed -i "s/domain-tld/${DOMAIN_TLD}/g" qgis-repo.conf

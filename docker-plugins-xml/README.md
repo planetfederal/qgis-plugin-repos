@@ -162,6 +162,7 @@ the following to your `hosts` file:
     <docker-machine-ip> boundless.test
     <docker-machine-ip> qgis.boundless.test
     <docker-machine-ip> qgis-dev.boundless.test
+    <docker-machine-ip> qgis-beta.boundless.test
 
 ### 6. Configure SSH client
 
@@ -207,10 +208,10 @@ Run the SSH-based remote loading script for the test plugins:
     ...
     test_plugin_3.zip     100% 2972     2.9KB/s   00:00
 
-This will load 3 test plugins into both the `release` and `dev` repositories,
+This will load 3 test plugins into the `release` `beta` and `dev` repositories,
 with `test_plugin_3` loaded as "download authenticated" restricted plugin.
 
-Note: this also sets up some basic web files for the `release` and `dev` sites.
+Note: this also sets up some basic web files for the `release`, `beta` and `dev` sites.
 
 ### 9. Test access to HTTP endpoints
 
@@ -218,6 +219,7 @@ Go to:
 
 - <http://qgis.boundless.test/>
 - <http://qgis-dev.boundless.test/>
+- <http://qgis-beta.boundless.test/>
 
 Should produce a _blank page_, with no error.
 
@@ -225,6 +227,7 @@ Go to:
 
 - <http://qgis.boundless.test/plugins/plugins.xml>
 - <http://qgis-dev.boundless.test/plugins/plugins.xml>
+- <http://qgis-beta.boundless.test/plugins/plugins.xml>
 
 Should produce a listing of 3 plugins. Each download link should download the
 appropriate ZIP archive, with the `test_plugin_3.zip` download requiring
@@ -254,6 +257,8 @@ Go to HTTPS URLs and verify the same results as with HTTP access above:
 - <https://qgis.boundless.test/plugins/plugins.xml>
 - <https://qgis-dev.boundless.test/>
 - <https://qgis-dev.boundless.test/plugins/plugins.xml>
+- <https://qgis-beta.boundless.test/>
+- <https://qgis-beta.boundless.test/plugins/plugins.xml>
 
 Additionally, the connection should be secured with a `*.boundless.test`
 wildcard certificate and there should be no SSL errors.

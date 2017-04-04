@@ -48,7 +48,7 @@ AUTH0_DOMAIN=your_domain.auth0.com
 #DEBUG=True
 ```
 
-### Retrieveing user informations
+### Retrieving user informations
 
 An additional endpoint allows to retrieve the user profile
 and user roles in `json` format and can be used to check if

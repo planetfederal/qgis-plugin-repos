@@ -50,9 +50,12 @@ USERNAME = 'user'
 PASSWORD = 'password'
 DEV_USERNAME = 'dev'
 DEV_PASSWORD = 'password'
+BETA_USERNAME = 'dev'
+BETA_PASSWORD = 'password'
 
 XML_ENDPOINT = os.environ.get('XML_ENDPOINT', 'https://qgis.boundless.test/plugins/')
 XML_DEV_ENDPOINT = os.environ.get('XML_DEV_ENDPOINT', 'https://qgis-dev.boundless.test/plugins/')
+XML_BETA_ENDPOINT = os.environ.get('XML_BETA_ENDPOINT', 'https://qgis-beta.boundless.test/plugins/')
 
 
 class TestAuthBase(unittest.TestCase):
@@ -177,6 +180,15 @@ class TestAuthGET_Dev(TestAuthGET):
     endpoint = XML_DEV_ENDPOINT
     username = DEV_USERNAME
     password = DEV_PASSWORD
+
+
+class TestAuthGET_Beta(TestAuthGET):
+    """
+    HTTP Basic with username and password method POST
+    """
+    endpoint = XML_BETA_ENDPOINT
+    username = BETA_USERNAME
+    password = BETA_PASSWORD
 
 
 

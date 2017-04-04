@@ -10,7 +10,7 @@ mkdir -p $WWW_DIR
 
 # Set up skeleton of plugin repo, to be overlaid with httpd-data volume
 
-for subdir in 'qgis' 'qgis-dev'; do
+for subdir in 'qgis' 'qgis-dev' 'qgis-beta'; do
   mkdir -p $WWW_DIR/$subdir/plugins/packages
   mkdir -p $WWW_DIR/$subdir/plugins/packages-auth
   touch $WWW_DIR/$subdir/index.html
@@ -43,6 +43,7 @@ echo "  'UPLOAD_BASE': '${REPO_UPDATER}'," >> ${SETTINGS_FILE}
 echo "  'UPLOADED_BY': '${UPLOADED_BY}'," >> ${SETTINGS_FILE}
 echo "  'DOMAIN_TLD': '${DOMAIN_TLD}'," >> ${SETTINGS_FILE}
 echo "  'DOMAIN_TLD_DEV': '${DOMAIN_TLD_DEV}'," >> ${SETTINGS_FILE}
+echo "  'DOMAIN_TLD_BETA': '${DOMAIN_TLD_BETA}'," >> ${SETTINGS_FILE}
 echo "}">> ${SETTINGS_FILE}
 
 

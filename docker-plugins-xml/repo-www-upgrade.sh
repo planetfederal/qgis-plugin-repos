@@ -12,9 +12,9 @@ echo -e "\nApplying environment..."
 echo -e "\nAttempting to pause running services..."
 docker-compose pause
 
-echo -e "\nAttempting to back up ${QGIS_REPO}'s /www/{qgis,qgis-dev} dirs to \n$ARCHIVE_DIR/${QGIS_ARCHIVE}..."
+echo -e "\nAttempting to back up ${QGIS_REPO}'s /www/{qgis,qgis-dev,qgis-beta} dirs to \n$ARCHIVE_DIR/${QGIS_ARCHIVE}..."
 docker run --rm --volumes-from $QGIS_REPO -v $ARCHIVE_DIR:/backup debian:jessie \
-  tar -cvzf /backup/$QGIS_ARCHIVE -C / /var/www/qgis /var/www/qgis-dev \
+  tar -cvzf /backup/$QGIS_ARCHIVE -C / /var/www/qgis /var/www/qgis-dev  /var/www/qgis-beta \
 || {
   echo -e "\n... backup failed"
   docker-compose unpause

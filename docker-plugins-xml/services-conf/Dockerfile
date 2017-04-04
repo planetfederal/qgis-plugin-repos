@@ -6,6 +6,7 @@ ARG SSH_PUBLIC_KEY=''
 ARG SSL_CUSTOM_CERT=''
 ARG DOMAIN_TLD=qgis.boundless.test
 ARG DOMAIN_TLD_DEV=qgis-dev.boundless.test
+ARG DOMAIN_TLD_BETA=qgis-beta.boundless.test
 
 ADD setup.sh /tmp/
 RUN sh /tmp/setup.sh
