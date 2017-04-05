@@ -1,4 +1,12 @@
-# htpasswd based auth
-include incl.d/try_file-dir-index;
-auth_basic "Authentication Required";
-auth_basic_user_file htpasswd/htpasswd-qgis-dev;
+# Two possibilities here:
+
+# 1 -htpasswd based auth
+#include incl.d/try_file-dir-index;
+#auth_basic "Authentication Required";
+#auth_basic_user_file htpasswd/htpasswd-qgis-dev;
+
+# Or:
+
+# 2- Auth is handled by Flask app
+include uwsgi_params;
+uwsgi_pass unix:///tmp/uwsgi.sock;
