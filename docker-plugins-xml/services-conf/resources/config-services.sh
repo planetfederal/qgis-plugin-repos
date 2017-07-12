@@ -71,3 +71,12 @@ cd $NGINX_CONF/conf.d
 sed -i "s/domain-tld-dev/${DOMAIN_TLD_DEV}/g" qgis-repo.conf
 sed -i "s/domain-tld-beta/${DOMAIN_TLD_BETA}/g" qgis-repo.conf
 sed -i "s/domain-tld/${DOMAIN_TLD}/g" qgis-repo.conf
+
+# Use 2048 bit Diffie-Hellman RSA key parameters
+# (otherwise Nginx defaults to 1024 bit, lowering the strength of encryption # when using PFS)
+# NOTE: this takes a minute or two
+# See: https://juliansimioni.com/blog/https-on-nginx-from-zero-to-a-plus-part-2-configuration-ciphersuites-and-performance/
+NGINX_SSL=/etc/nginx/ssl
+mkdir -p $NGINX_SSL
+openssl dhparam -outform pem -out $NGINX_SSL/dhparam2048.pem 2048
+chmod go-r $NGINX_SSL/dhparam2048.pem

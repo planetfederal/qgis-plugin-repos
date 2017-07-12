@@ -20,6 +20,9 @@ NGINX_VERSION=1.9.11-1~jessie
 apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 echo "deb http://nginx.org/packages/mainline/debian/ jessie nginx" >> /etc/apt/sources.list
 
+# add backports for OpenSSL 1.0.2+
+echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
+
 apt-get -y update
 apt-get -y upgrade
 DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -28,13 +31,20 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
   git \
   supervisor \
   ca-certificates \
-  nginx=${NGINX_VERSION} \
+  curl \
   gettext-base \
   openssh-server \
   python-pip \
   python-lxml \
   python-dev \
   vim
+
+# backport of OpenSSL 1.0.2+ (instead of stable's 1.0.1)
+DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install "openssl"
+
+# update nginx gpg key and install
+curl https://nginx.org/keys/nginx_signing.key | apt-key add -
+DEBIAN_FRONTEND=noninteractive apt-get -y install nginx=${NGINX_VERSION}
 
 pip install uwsgi
 apt-get -q clean
