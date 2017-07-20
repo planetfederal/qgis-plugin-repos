@@ -12,6 +12,7 @@ mkdir -p $WWW_DIR
 
 for subdir in 'qgis' 'qgis-dev' 'qgis-beta'; do
   mkdir -p $WWW_DIR/$subdir/plugins/packages
+  mkdir -p $WWW_DIR/$subdir/.well-known
   mkdir -p $WWW_DIR/$subdir/plugins/packages-auth
   touch $WWW_DIR/$subdir/index.html
   touch $WWW_DIR/$subdir/plugins/index.html

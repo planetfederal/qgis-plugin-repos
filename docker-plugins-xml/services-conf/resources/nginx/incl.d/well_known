@@ -1,0 +1,6 @@
+
+# Grant access to the letsencrypt certbot standard directory
+
+location ~ /.well-known {
+   allow all;
+}

@@ -1,7 +1,7 @@
 # Docker-based QGIS Plugin Repository
 
 This orchestrated setup is for quickly standing up two HTTP(S) endpoints for
-simple QGIS plugin repositories (for _release_ and _dev_), then updating them
+simple QGIS plugin repositories (for _release_, _beta_, and _dev_), then updating them
 via SSH by uploading PyQGIS plugin ZIP archives and running a Python updater
 script to process the archives. It is particularly useful for processing
 automated developer builds of plugins (e.g. from Jenkins or Travis CI).
@@ -388,3 +388,7 @@ to the user folder):
 ## Auth0 setup
 
 See the `README.md` file in `auth0` folder.
+
+## Production HTTPS setup
+
+For Boundless internal repositories HTTPS setup, please refer to the document in Confluence under Boundless Desktop/Development Pages/Boundless Plugin Repositories

@@ -38,3 +38,13 @@ pushd /opt > /dev/null
 popd  > /dev/null #/opt
 
 chown -R ${SSH_USER}:users /opt
+
+# Use 2048 bit Diffie-Hellman RSA key parameters
+# (otherwise Nginx defaults to 1024 bit, lowering the strength of encryption # when using PFS)
+# NOTE: this takes a minute or two
+# See: https://juliansimioni.com/blog/https-on-nginx-from-zero-to-a-plus-part-2-configuration-ciphersuites-and-performance/
+# Note that we need to use a directory that is not overlaid by other docker volumes!
+NGINX_SSL=/etc/nginx-no-overlay/ssl
+mkdir -p $NGINX_SSL
+openssl dhparam -outform pem -out $NGINX_SSL/dhparam2048.pem 2048
+chmod go-r $NGINX_SSL/dhparam2048.pem

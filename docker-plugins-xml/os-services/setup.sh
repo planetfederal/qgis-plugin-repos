@@ -46,6 +46,9 @@ DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install "openssl"
 curl https://nginx.org/keys/nginx_signing.key | apt-key add -
 DEBIAN_FRONTEND=noninteractive apt-get -y install nginx=${NGINX_VERSION}
 
+# Install certbot for letsencrypt certificates (used by 'dev' and 'beta' repos)
+DEBIAN_FRONTEND=noninteractive apt-get -y install certbot -t jessie-backports
+
 pip install uwsgi
 apt-get -q clean
 apt-get -q purge
