@@ -203,7 +203,7 @@ permissions using `sudo`.
 
 Run the SSH-based remote loading script for the test plugins:
 
-    $> ./www-data/resources/plugins-xml/test/remote-load-test-plugins.sh
+    $> ./www-data/resources/plugins-xml/test/remote-load-test-plugins.sh boundless.test
     test_plugin_1.zip     100% 2768     2.7KB/s   00:00
     ...
     test_plugin_3.zip     100% 2972     2.9KB/s   00:00
