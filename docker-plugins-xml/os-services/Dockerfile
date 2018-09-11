@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:stretch
 MAINTAINER Larry Shaffer<lshaffer@boundlessgeo.com>
 
 ARG SSH_USER=user
