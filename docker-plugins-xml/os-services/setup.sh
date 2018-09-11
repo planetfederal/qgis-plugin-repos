@@ -14,21 +14,18 @@ if [ -n "${APT_CATCHER_IP}" ] && [ "${APT_CATCHER_IP}" != "None" ]; then
   echo 'Acquire::http { Proxy "http://'${APT_CATCHER_IP}':3142"; };' >> /etc/apt/apt.conf.d/01proxy
 fi
 
-# Specific versions
-NGINX_VERSION=1.9.11-1~jessie
 
-apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
-echo "deb http://nginx.org/packages/mainline/debian/ jessie nginx" >> /etc/apt/sources.list
-
-# add backports for OpenSSL 1.0.2+
-echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
+# Add security updates to sources.list
+echo "deb http://security.debian.org/debian-security stretch/updates main contrib non-free" >> /etc/apt/sources.list
 
 apt-get -y update
 apt-get -y upgrade
 DEBIAN_FRONTEND=noninteractive apt-get -y install \
   nano \
   sudo \
+  cron \
   git \
+  gnupg \
   supervisor \
   ca-certificates \
   curl \
@@ -37,19 +34,24 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
   python-pip \
   python-lxml \
   python-dev \
-  vim
+  vim \
+  certbot
+# certbot for letsencrypt certificates (used by 'dev' and 'beta' repos)
 
-# backport of OpenSSL 1.0.2+ (instead of stable's 1.0.1)
-DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install "openssl"
+# Nginx from project's repo
+NGINX_VERSION=1.12.0-1~stretch
 
-# update nginx gpg key and install
+# Update nginx gpg key and install
 curl https://nginx.org/keys/nginx_signing.key | apt-key add -
+echo "deb http://nginx.org/packages/debian/ stretch nginx" >> /etc/apt/sources.list
+apt-get -y update
+
 DEBIAN_FRONTEND=noninteractive apt-get -y install nginx=${NGINX_VERSION}
 
-# Install certbot for letsencrypt certificates (used by 'dev' and 'beta' repos)
-DEBIAN_FRONTEND=noninteractive apt-get -y install certbot -t jessie-backports
-
+# WSGI
 pip install uwsgi
+
+# Clean up image
 apt-get -q clean
 apt-get -q purge
 rm -rf /var/lib/apt/lists/*
