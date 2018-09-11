@@ -16,10 +16,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p $ARCHIVE_DIR
 
-if [ -z "$COMPOSE_PROJECT_NAME" ]; then
-  echo -e "\nApplying environment..."
-  . ${SCRIPT_DIR}/docker-compose.env
-fi
+echo -e "\nApplying environment..."
+. ${SCRIPT_DIR}/docker-compose.env
 
 echo -e "\nAttempting to back up ${QGIS_BASE}'s dirs with data to \n$ARCHIVE_DIR/${QGIS_ARCHIVE}..."
 docker exec $QGIS_BASE \
