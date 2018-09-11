@@ -24,6 +24,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
   nano \
   sudo \
   cron \
+  unattended-upgrades \
   git \
   gnupg \
   supervisor \
