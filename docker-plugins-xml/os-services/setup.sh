@@ -55,6 +55,6 @@ apt-get -q purge
 rm -rf /var/lib/apt/lists/*
 
 # NOTE: SSH user, whose uid all data containers should reference
-adduser --system --ingroup users --shell /bin/bash --uid 106 ${SSH_USER}
+adduser --system --ingroup users --shell /bin/bash --uid 110 ${SSH_USER}
 echo "${SSH_USER}:${SSH_USER_PASS}" | chpasswd
 su -c "gpasswd -a ${SSH_USER} sudo"
