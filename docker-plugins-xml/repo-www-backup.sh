@@ -21,7 +21,11 @@ echo -e "\nApplying environment..."
 
 echo -e "\nAttempting to back up ${QGIS_BASE}'s www dir to \n$ARCHIVE_DIR/${QGIS_ARCHIVE}..."
 docker exec $QGIS_BASE \
-tar -C / -cf -  /var/www/qgis* | gzip > $ARCHIVE_DIR/$QGIS_ARCHIVE
+tar -C / -cf - \
+  /var/www/qgis \
+  /var/www/qgis-dev \
+  /var/www/qgis-beta \
+| gzip > $ARCHIVE_DIR/$QGIS_ARCHIVE
 
 if [ ! -f $ARCHIVE_DIR/$QGIS_ARCHIVE ]; then
   echo -e "\n... backup failed"
