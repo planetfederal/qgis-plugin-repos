@@ -1,14 +1,14 @@
 ## Adding your SSL custom certificate
 
-Set the environment variable in `docker-compose.env`:
+Set the environment variable in `~/.docker-compose-plugins-xml.env`:
 
     export SSL_CUSTOM_CERT=1
 
-Place your server's certificate chain and private key in this directory, and
-name them exactly:
+Place your server's certificate chain and private key in your HOME directory, then
+name them exactly (note dot at beginning):
 
-- `qgisrepo-server.crt`
-- `qgisrepo-server.key`
+- `.qgisrepo-server.crt`
+- `.qgisrepo-server.key`
 
 Note: the `.crt` file should contain, in the following order:
 

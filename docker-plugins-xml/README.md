@@ -293,10 +293,10 @@ Otherwise, log in via a remote SSH connection.
 
 ## Customization
 
-Review/edit the [docker-compose.env][dke] file for customization of the build
-environment.
+Copy the [docker-compose-plugins-xml.env][dke] file to your HOME directory and customize
+it to set the build environment.
 
-[dke]: ./docker-compose.env
+[dke]: ./docker-compose-plugins-xml.env
 
 Edit files under [services-conf/resources][svc] to configure **conf** image.
 
