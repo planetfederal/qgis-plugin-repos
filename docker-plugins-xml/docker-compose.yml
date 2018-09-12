@@ -8,6 +8,7 @@ services:
         - UPLOADED_BY
         - DOMAIN_TLD
         - DOMAIN_TLD_DEV
+        - DOMAIN_TLD_BETA
   conf:
     build:
       context: ./services-conf
@@ -17,6 +18,7 @@ services:
         - SSL_CUSTOM_CERT
         - DOMAIN_TLD
         - DOMAIN_TLD_DEV
+        - DOMAIN_TLD_BETA
   base:
     build:
       context: ./os-services
