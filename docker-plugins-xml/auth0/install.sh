@@ -2,9 +2,12 @@
 
 set -ex
 
-PWWD=`pwd`
-cd .. && . ./docker-compose.env
-cd $PWWD
+
+if [ -z $SSH_CONFIG_NAME ]; then
+  PWWD=`pwd`
+  cd .. && . ./docker-compose.env
+  cd $PWWD
+fi
 
 
 if [ -f ~/.auth0.env ]; then
