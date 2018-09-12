@@ -24,13 +24,14 @@ docker exec $QGIS_BASE \
 tar -C / -cf - \
   home/${SSH_USER} \
   etc/nginx \
+  etc/letsencrypt \
   etc/ssh \
   etc/ssl/nginx \
   etc/supervisor \
   etc/uwsgi \
   opt \
   usr/lib/nginx \
-  /var/www \
+  var/www \
 | gzip > $ARCHIVE_DIR/$QGIS_ARCHIVE
 
 if [ ! -f $ARCHIVE_DIR/$QGIS_ARCHIVE ]; then
