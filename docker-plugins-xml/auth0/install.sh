@@ -9,17 +9,19 @@ if [ -z $SSH_CONFIG_NAME ]; then
   cd $PWWD
 fi
 
+QGIS_BASE=qgisrepo_base_1
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ -f ~/.auth0.env ]; then
     scp ~/.auth0.env ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 fi
 
-scp resources/auth.py ${SSH_CONFIG_NAME}:/var/www
-scp resources/settings.py ${SSH_CONFIG_NAME}:/var/www
-scp resources/auth ${SSH_CONFIG_NAME}:/home/${SSH_USER}
-scp resources/api ${SSH_CONFIG_NAME}:/home/${SSH_USER}
-scp resources/REQUIREMENTS.txt ${SSH_CONFIG_NAME}:/home/${SSH_USER}
-#scp resources/setup-repo.sh  ${SSH_CONFIG_NAME}:/home/${SSH_USER}
+scp ${SCRIPT_DIR}/resources/auth.py ${SSH_CONFIG_NAME}:/var/www
+scp ${SCRIPT_DIR}/resources/settings.py ${SSH_CONFIG_NAME}:/var/www
+scp ${SCRIPT_DIR}/resources/auth ${SSH_CONFIG_NAME}:/home/${SSH_USER}
+scp ${SCRIPT_DIR}/resources/api ${SSH_CONFIG_NAME}:/home/${SSH_USER}
+scp ${SCRIPT_DIR}/resources/REQUIREMENTS.txt ${SSH_CONFIG_NAME}:/home/${SSH_USER}
+#scp ${SCRIPT_DIR}/resources/setup-repo.sh  ${SSH_CONFIG_NAME}:/home/${SSH_USER}
 
 
 # Install all modifications and restart services
@@ -39,4 +41,9 @@ chown -R uwsgi /home/uwsgi
 supervisorctl restart app-uwsgi
 supervisorctl restart nginx
 \" > /home/${SSH_USER}/setup.sh"
-LC_ALL="C" ssh -t ${SSH_CONFIG_NAME} "sudo /bin/bash /home/${SSH_USER}/setup.sh"
+
+# run as root in container
+docker exec -i ${QGIS_BASE} bash <<EOF
+chmod 0700 /home/${SSH_USER}/setup.sh
+/home/${SSH_USER}/setup.sh
+EOF
