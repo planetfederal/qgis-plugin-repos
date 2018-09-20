@@ -2,7 +2,7 @@
 
 flask
 dotenv
-auth0-python
+auth0-python==2.0.1
 PyJWT
 
 # Currently not necessary, but they were in the original examples and left here
