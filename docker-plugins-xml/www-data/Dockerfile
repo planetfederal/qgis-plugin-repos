@@ -1,5 +1,5 @@
 FROM busybox
-MAINTAINER Larry Shaffer<lshaffer@boundlessgeo.com>
+LABEL maintainer="Larry Shaffer<lshaffer@boundlessgeo.com>"
 
 ARG SSH_USER=user
 ARG UPLOADED_BY=Boundless
