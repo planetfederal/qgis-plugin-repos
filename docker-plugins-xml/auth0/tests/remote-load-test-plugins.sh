@@ -15,7 +15,7 @@ cd "${SCRIPT_DIR}/../../www-data/resources/plugins-xml/uploads"
 
 SSH_HOST="${1}"
 UPLOADS="/opt/repo-updater/uploads/"
-UPDATER="/opt/repo-updater/plugins-xml/plugins-xml.sh"
+UPDATER="/opt/repo-updater/plugins-xml/scripts/plugins-xml.sh"
 
 # No auth required
 for zp in test_plugin_1.zip

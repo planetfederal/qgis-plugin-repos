@@ -28,7 +28,7 @@ cd "${SCRIPT_DIR}/../../www-data/resources/plugins-xml/uploads"
 
 SSH_HOST="${1}"
 UPLOADS="/opt/repo-updater/uploads/"
-UPDATER="/opt/repo-updater/plugins-xml/plugins-xml.sh"
+UPDATER="/opt/repo-updater/plugins-xml/scripts/plugins-xml.sh"
 
 function upload_plugin {
   LC_ALL=C  scp $1 ${SSH_HOST}:${UPLOADS} &>/dev/null

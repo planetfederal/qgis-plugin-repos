@@ -132,11 +132,11 @@ the Auth0 roles that will be able to download the plugin, for example::
 Run remote updater script on uploaded archive and set roles allowed to
 download to `DesktopBasic`:
 
-    $> ssh boundless.test "/opt/repo-updater/plugins-xml/plugins-xml.sh update --role 'DesktopBasic' test_plugin_1.zip"
+    $> ssh boundless.test "/opt/repo-updater/plugins-xml/scripts/plugins-xml.sh update --role 'DesktopBasic' test_plugin_1.zip"
 
 or, set multiple roles:
 
-    $> ssh boundless.test "/opt/repo-updater/plugins-xml/plugins-xml.sh update --role 'DesktopBasic,DesktopEnterprise' test_plugin_1.zip"
+    $> ssh boundless.test "/opt/repo-updater/plugins-xml/scripts/plugins-xml.sh update --role 'DesktopBasic,DesktopEnterprise' test_plugin_1.zip"
 
 
 ## Installation

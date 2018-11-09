@@ -26,9 +26,10 @@ chown -R ${SSH_USER}:users $WWW_DIR
 
 REPO_UPDATER=/opt/repo-updater
 PLUGINS_XML=$REPO_UPDATER/plugins-xml
-UPDATE_SCRIPT=$PLUGINS_XML/plugins-xml.py
-UPDATE_WRAPPER=$PLUGINS_XML/plugins-xml.sh
-SETTINGS_FILE=$PLUGINS_XML/settings.py
+UPDATE_SCRIPT=$PLUGINS_XML/scripts/plugins-xml.py
+UPDATE_WRAPPER=$PLUGINS_XML/scripts/plugins-xml.sh
+SETTINGS_FILE_TEMPL=$PLUGINS_XML/scripts/settings.py.tmpl
+SETTINGS_FILE=$PLUGINS_XML/scripts/settings.py
 PY_VENV=/opt/venv
 
 mkdir -p $REPO_UPDATER/uploads
