@@ -9,6 +9,7 @@ services:
         - DOMAIN_TLD
         - DOMAIN_TLD_DEV
         - DOMAIN_TLD_BETA
+        - DOMAIN_TLD_MIRROR
   conf:
     build:
       context: ./services-conf

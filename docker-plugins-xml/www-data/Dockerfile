@@ -6,6 +6,7 @@ ARG UPLOADED_BY=Boundless
 ARG DOMAIN_TLD=qgis.boundless.test
 ARG DOMAIN_TLD_BETA=qgis-beta.boundless.test
 ARG DOMAIN_TLD_DEV=qgis-dev.boundless.test
+ARG DOMAIN_TLD_MIRROR=qgis-mirror.boundless.test
 
 ADD setup.sh /tmp/
 RUN sh /tmp/setup.sh
