@@ -32,5 +32,5 @@ sudo sed -i -e "s/172.[0-9]\+.0../${CONTAINER_IP}/g" /etc/hosts
 if [ "$1" == "load" ]; then
   echo -e "\nRemotely loading test plugins..."
   sleep 5
-  ./www-data/resources/plugins-xml/test/remote-load-test-plugins.sh $SSH_CONFIG_NAME
+  ./www-data/resources/plugins-xml/scripts/load-test-plugins-remote.sh $SSH_CONFIG_NAME
 fi
