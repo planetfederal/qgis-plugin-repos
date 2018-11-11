@@ -36,6 +36,10 @@ mkdir -p $REPO_UPDATER/uploads
 
 mv /opt/setup/plugins-xml $PLUGINS_XML
 
+# Support older script filesystem layout
+# (path in .travis.yml encrypted env var data in many plugin's CI)
+ln -sf scripts/plugins-xml.sh ${PLUGINS_XML}/plugins-xml.sh
+
 # Save the settings in /opt/repo-updater/plugins-xml/scripts/settings.py
 # overwrite existing settings.py
 cp -f "${SETTINGS_FILE_TEMPL}" "${SETTINGS_FILE}"
